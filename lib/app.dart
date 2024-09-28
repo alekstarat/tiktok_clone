@@ -8,10 +8,11 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        splashColor: Colors.transparent
+        splashColor: Colors.transparent,
+        fontFamily: 'PTSans'
       ),
       debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
+      home: const HomeScreen(),
     );
   }
 }

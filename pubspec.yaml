@@ -7,9 +7,12 @@ environment:
   sdk: '>=3.4.3 <4.0.0'
 
 dependencies:
+  cupertino_icons: ^1.0.8
   flutter:
     sdk: flutter
   flutter_bloc: ^8.1.6
+  flutter_svg: ^2.0.10+1
+  video_player: ^2.9.1
 
 dev_dependencies:
   flutter_test:
@@ -18,3 +21,17 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  fonts:
+    - family: PoiretOne
+      fonts:
+        - asset: assets/fonts/PoiretOne-Regular.ttf
+    - family: PTSans
+      fonts:
+        - asset: assets/fonts/PTSans-Regular.ttf
+        - asset: assets/fonts/PTSans-Bold.ttf
+          weight: 900
+  
+  assets:
+    - 'assets/videos/'
+    - 'assets/images/'
