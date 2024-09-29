@@ -9,14 +9,14 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
+class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin {
 
   late final TabController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = TabController(length: 2, vsync: this, initialIndex: 1);
+    _controller = TabController(length: 2, vsync: this, initialIndex: 1, animationDuration: const Duration(seconds: 0));
   }
 
   @override

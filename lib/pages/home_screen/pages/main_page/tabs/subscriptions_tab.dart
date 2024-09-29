@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tiktok_clone/components/loading_screen.dart';
 
 class SubscriptionsTab extends StatelessWidget {
   const SubscriptionsTab({super.key});
@@ -8,6 +9,7 @@ class SubscriptionsTab extends StatelessWidget {
     return Container(
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height - kToolbarHeight + 10,
+      child: LoadingScreen(),
     );
   }
 }

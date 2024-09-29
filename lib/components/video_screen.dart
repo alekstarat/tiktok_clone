@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:tiktok_clone/components/comments_widget.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoScreen extends StatefulWidget {
@@ -25,7 +26,6 @@ class _VideoScreenState extends State<VideoScreen> {
     super.initState();
     _controller = VideoPlayerController.asset('assets/videos/${widget.index}.mp4')
       ..initialize().then((_) async {
-        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
         setState(() {});
         _controller.setLooping(true);
         await _controller.play();
@@ -41,6 +41,8 @@ class _VideoScreenState extends State<VideoScreen> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      trackpadScrollCausesScale: false,
       onTap: () async {
         if (_controller.value.isPlaying) {
           await _controller.pause();
@@ -177,20 +179,35 @@ class _VideoScreenState extends State<VideoScreen> {
                       ],
                     ),
                     const SizedBox(height: 10,),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        //Icon(Icons.insert_comment_rounded, color: Colors.white, size: 35),
-                        Icon(CupertinoIcons.chat_bubble_text_fill, color: Colors.white, size: 30, shadows: [Shadow(color: Colors.black.withOpacity(0.5), blurRadius: 10)]),
-                        Text(
-                          "52",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            shadows: [Shadow(color: Colors.black.withOpacity(1), blurRadius: 10)]
+                    GestureDetector(
+                      onTap: () {
+                        showModalBottomSheet(
+                          shape:  const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(14))),
+                          barrierColor: Colors.transparent,
+                          context: context, 
+                          builder: (context) => GestureDetector(
+                            onTap: () {
+                              FocusScope.of(context).unfocus();
+                            },
+                            child: const CommentsWidget()
                           )
-                        )
-                      ],
+                        );
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          //Icon(Icons.insert_comment_rounded, color: Colors.white, size: 35),
+                          Icon(CupertinoIcons.chat_bubble_text_fill, color: Colors.white, size: 30, shadows: [Shadow(color: Colors.black.withOpacity(0.5), blurRadius: 10)]),
+                          Text(
+                            "52",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              shadows: [Shadow(color: Colors.black.withOpacity(1), blurRadius: 10)]
+                            )
+                          )
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 10,),
                     Column(

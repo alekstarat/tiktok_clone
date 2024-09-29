@@ -12,11 +12,12 @@ class _RecomendationsTabState extends State<RecomendationsTab> with TickerProvid
 
   late final TabController _controller;
   List<int> ids = [1, 2];
+  List<VideoScreen> loadedVideos = [];
   
   @override
   void initState() {
     super.initState();
-    _controller = TabController(length: ids.length, vsync: this);
+    _controller = TabController(length: ids.length, vsync: this, initialIndex: 0);
   }
 
   @override
@@ -32,12 +33,12 @@ class _RecomendationsTabState extends State<RecomendationsTab> with TickerProvid
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height - kToolbarHeight + 10,
       child: RotatedBox(
-        quarterTurns: 3,
+        quarterTurns: 1,
         child: TabBarView(
           controller: _controller,
           children: List.generate(ids.length, (int i) {
             return RotatedBox(
-              quarterTurns: 1,
+              quarterTurns: 3,
               child: VideoScreen(index: ids[i])
             );
           })
