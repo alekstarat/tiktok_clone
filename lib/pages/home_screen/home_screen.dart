@@ -17,16 +17,18 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
 
-  late final TabController _tabController;
+  late final TabController _tabController, _mainController;
 
 
   int currPage = 1;
-  List<Widget> pages = [const MainPage(), const FriendsPage(), const MessagesPage(), const ProfilePage()];
+  List<Widget> pages = [];
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this, animationDuration: const Duration(microseconds: 0));
+    _tabController = TabController(length: 2, vsync: this, animationDuration: const Duration(milliseconds: 200));
+    _mainController = TabController(length: 2, vsync: this, initialIndex: 1, animationDuration: const Duration(milliseconds: 200));
+    pages = [MainPage(mainController: _mainController,), const FriendsPage(), const MessagesPage(), const ProfilePage(id: 0, fromVideo: false,)];
   }
 
   @override
@@ -199,7 +201,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
               ),
             ],
           ),
-          ProfilePage()
+          ProfilePage(id: 0, fromVideo: true, onBack: () {
+            _tabController.animateTo(0);
+          },)
         ],
       ),
     );

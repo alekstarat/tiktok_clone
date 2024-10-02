@@ -1,23 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:tiktok_clone/pages/home_screen/pages/main_page/tabs/recomendations_tab.dart';
 import 'package:tiktok_clone/pages/home_screen/pages/main_page/tabs/subscriptions_tab.dart';
+import 'package:tiktok_clone/pages/search_page/pages/search_page.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+
+  final TabController? mainController;
+
+  const MainPage({super.key, this.mainController});
 
   @override
   State<MainPage> createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin {
-
-  late final TabController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TabController(length: 2, vsync: this, initialIndex: 1, animationDuration: const Duration(seconds: 0));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +26,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
             children: [
               TabBarView(
                 physics: const PageScrollPhysics(),
-                controller: _controller,
+                controller: widget.mainController,
                 children: const [
                   SubscriptionsTab(),
                   RecomendationsTab(),
@@ -50,8 +46,9 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
                     dividerColor: Colors.transparent,
                     tabAlignment: TabAlignment.center,
                     isScrollable: true,
+                    unselectedLabelColor: Colors.white.withOpacity(0.4),
                     labelColor: Colors.white,
-                    controller: _controller, 
+                    controller: widget.mainController, 
                     tabs: const [
                       Tab(text: "Подписки",),
                       Tab(text: "Рекомендации")
@@ -66,11 +63,18 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
                   child: Icon(Icons.live_tv_rounded, color: Colors.white, size: 23),
                 ),
               ),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
                 child: Align(
                   alignment: Alignment.topRight,
-                  child: Icon(Icons.search, color: Colors.white, size: 27),
+                  child: GestureDetector(
+                    onTap: () {Navigator.push(context, MaterialPageRoute(builder: (context) => const SearchPage()));},
+                    child: const Icon(
+                      Icons.search, 
+                      color: Colors.white, 
+                      size: 27
+                    )
+                  ),
                 ),
               ),
             ],

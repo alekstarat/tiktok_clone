@@ -1,3 +1,4 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:tiktok_clone/components/video_screen.dart';
 
@@ -10,21 +11,24 @@ class RecomendationsTab extends StatefulWidget {
 
 class _RecomendationsTabState extends State<RecomendationsTab> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
 
-  late final TabController _controller;
-  List<int> ids = [1, 2];
-  List<VideoScreen> loadedVideos = [];
+  List<int> ids = [1, 2, 3, 2, 4, 2, 1, 3, 1, 4, 1, 4, 3, 3, 1, 2]..shuffle();
+  List<Widget> loadedVideos = [];
+  int viewsCount = 0, currIdx = 0;
+  final CarouselSliderController _controller = CarouselSliderController();
   
   @override
   void initState() {
     super.initState();
-    _controller = TabController(length: ids.length, vsync: this, initialIndex: 0);
+    _loadVideos();
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  void _loadVideos() {
+    setState(() {
+      loadedVideos.addAll(List<Widget>.generate(5, (index) => VideoScreen(index: ids[index], fromRecomendations: true)));
+    });
+    print("LOADED VIDEOS: ${loadedVideos.length}");
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -32,17 +36,26 @@ class _RecomendationsTabState extends State<RecomendationsTab> with TickerProvid
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height - kToolbarHeight + 10,
-      child: RotatedBox(
-        quarterTurns: 1,
-        child: TabBarView(
-          controller: _controller,
-          children: List.generate(ids.length, (int i) {
-            return RotatedBox(
-              quarterTurns: 3,
-              child: VideoScreen(index: ids[i])
-            );
-          })
-        ),
+      child: CarouselSlider(
+        carouselController: _controller,
+        items: loadedVideos, 
+        options: CarouselOptions(
+          scrollDirection: Axis.vertical,
+          viewportFraction: 1,
+          enableInfiniteScroll: false,
+          enlargeCenterPage: false,
+          onPageChanged: (index, reason) {
+            if (index >= currIdx) {
+              setState(() {
+                currIdx = index;
+              });
+            }
+            print("currIdx: $currIdx");
+            if (index % loadedVideos.length-1 == 0) {
+              _loadVideos();
+            }
+          },
+        )
       )
     );
   }

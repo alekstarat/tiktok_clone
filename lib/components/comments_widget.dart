@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:tiktok_clone/components/comment_tile.dart';
 
 class CommentsWidget extends StatelessWidget {
+
+  //final FocusNode focusNode;
+
   const CommentsWidget({super.key});
 
   @override
@@ -94,6 +97,7 @@ class CommentsWidget extends StatelessWidget {
                         width: MediaQuery.of(context).size.width-52,
                         height: 30,
                         child: CupertinoTextField(
+                          //focusNode: focusNode,
                           cursorColor: Colors.red,
                           cursorWidth: 1,
                           

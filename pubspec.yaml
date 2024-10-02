@@ -7,12 +7,16 @@ environment:
   sdk: '>=3.4.3 <4.0.0'
 
 dependencies:
+  carousel_slider: ^5.0.0
   cupertino_icons: ^1.0.8
+  dio: ^5.7.0
   flutter:
     sdk: flutter
   flutter_bloc: ^8.1.6
+  flutter_native_splash: ^2.4.1
   flutter_svg: ^2.0.10+1
   nested_scroll_views: ^0.0.11
+  shared_preferences: ^2.3.2
   video_player: ^2.9.1
 
 dev_dependencies:
@@ -36,3 +40,13 @@ flutter:
   assets:
     - 'assets/videos/'
     - 'assets/images/'
+  
+flutter_native_splash:
+  android: true
+  ios: false
+  web: false
+  image: assets/images/BCLogo.png
+  color: "#000000"
+  android_12:
+    image: assets/images/BCLogo.png
+    color: "#000000"
