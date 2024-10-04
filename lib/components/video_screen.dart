@@ -7,6 +7,7 @@ import 'package:tiktok_clone/components/comments_widget.dart';
 import 'package:tiktok_clone/components/loading_screen.dart';
 import 'package:tiktok_clone/pages/search_page/pages/search_page.dart';
 import 'package:video_player/video_player.dart';
+import 'package:better_player/better_player.dart';
 
 class VideoScreen extends StatefulWidget {
   final int index;
@@ -20,7 +21,8 @@ class VideoScreen extends StatefulWidget {
 }
 
 class _VideoScreenState extends State<VideoScreen> {
-  late final VideoPlayerController _controller;
+  //late final VideoPlayerController _controller;
+  late final BetterPlayerController _controller;
   bool isPaused = false;
   double turns = 10;
   final FocusNode _focusNode = FocusNode();
@@ -28,18 +30,28 @@ class _VideoScreenState extends State<VideoScreen> {
   @override
   void initState() {
     super.initState();
-    _controller =
-        VideoPlayerController.asset('assets/videos/${widget.index}.mp4')
-          ..initialize().then((_) async {
-            setState(() {});
-            _controller.setLooping(true);
-            await _controller.play();
-          });
+    _controller = BetterPlayerController(
+      const BetterPlayerConfiguration(),
+      // betterPlayerDataSource: BetterPlayerDataSource(
+      //   BetterPlayerDataSourceType.file, 
+      //   videoFormat: BetterPlayerVideoFormat.ss,
+      //   "/assets/videos/${widget.index}.mp4"
+      // ) ,
+    );
+
+    
+    // _controller =
+    //     VideoPlayerController.asset('assets/videos/${widget.index}.mp4')
+    //       ..initialize().then((_) async {
+    //         setState(() {});
+    //         _controller.setLooping(true);
+    //         await _controller.play();
+    //       });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    //_controller.dispose();
     super.dispose();
   }
 
@@ -50,20 +62,20 @@ class _VideoScreenState extends State<VideoScreen> {
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
         trackpadScrollCausesScale: false,
-        onTap: () async {
-          _focusNode.unfocus();
-          if (_controller.value.isPlaying) {
-            await _controller.pause();
-            setState(() {
-              isPaused = true;
-            });
-          } else {
-            await _controller.play();
-            setState(() {
-              isPaused = false;
-            });
-          }
-        },
+        // onTap: () async {
+        //   _focusNode.unfocus();
+        //   if (_controller.value.isPlaying) {
+        //     await _controller.pause();
+        //     setState(() {
+        //       isPaused = true;
+        //     });
+        //   } else {
+        //     await _controller.play();
+        //     setState(() {
+        //       isPaused = false;
+        //     });
+        //   }
+        // },
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height - kToolbarHeight + 10,
@@ -71,18 +83,33 @@ class _VideoScreenState extends State<VideoScreen> {
             children: [
               Align(
                 alignment: Alignment.center,
-                child: _controller.value.isInitialized
-                    ? SizedBox(
-                        height: MediaQuery.of(context).size.height -
-                            kToolbarHeight +
-                            10,
-                        width: _controller.value.size.width,
-                        child: AspectRatio(
-                          aspectRatio: _controller.value.aspectRatio,
-                          child: VideoPlayer(_controller),
-                        ),
-                      )
-                    : const LoadingScreen(),
+                // child: _controller.value.isInitialized
+                //     ? SizedBox(
+                //         height: MediaQuery.of(context).size.height -
+                //             kToolbarHeight +
+                //             10,
+                //         width: _controller.value.size.width,
+                //         child: AspectRatio(
+                //           aspectRatio: _controller.value.aspectRatio,
+                //           child: VideoPlayer(_controller),
+                //         ),
+                //       )
+                //     : const LoadingScreen(),
+                // child: AspectRatio(
+                //   aspectRatio: 16/9,
+                //   child: BetterPlayer(
+                //     controller: _controller,
+                //   ),
+                // ),
+                // child: AspectRatio(
+                //   aspectRatio: 16/9,
+                // //   child: BetterPlayer.file(
+                // //     'assets/videos/1.mp4',
+                // //     betterPlayerConfiguration: BetterPlayerConfiguration(
+
+                // //     ),
+                // //   ),
+                // // ),
               ),
               IgnorePointer(
                 ignoring: true,
@@ -130,25 +157,25 @@ class _VideoScreenState extends State<VideoScreen> {
                   ),
                 ),
               ),
-              Padding(
-                padding:
-                    EdgeInsets.only(bottom: widget.fromRecomendations ? 0 : 30),
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: SizedBox(
-                      width: MediaQuery.of(context).size.width,
-                      height: 2,
-                      child: VideoProgressIndicator(
-                        _controller,
-                        allowScrubbing: true,
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        colors: VideoProgressColors(
-                          playedColor: Colors.white,
-                          backgroundColor: Colors.grey.shade800,
-                        ),
-                      )),
-                ),
-              ),
+              // Padding(
+              //   padding:
+              //       EdgeInsets.only(bottom: widget.fromRecomendations ? 0 : 30),
+              //   child: Align(
+              //     alignment: Alignment.bottomCenter,
+              //     child: SizedBox(
+              //         width: MediaQuery.of(context).size.width,
+              //         height: 2,
+              //         child: VideoProgressIndicator(
+              //           _controller,
+              //           allowScrubbing: true,
+              //           padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              //           colors: VideoProgressColors(
+              //             playedColor: Colors.white,
+              //             backgroundColor: Colors.grey.shade800,
+              //           ),
+              //         )),
+              //   ),
+              // ),
 
               // Лайки комменты ------------------------------------------------------
 

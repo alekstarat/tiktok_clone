@@ -11,6 +11,7 @@ class VideosTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
+      shrinkWrap: true,
       padding: EdgeInsets.zero,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(childAspectRatio: 0.75, crossAxisCount: 3, mainAxisSpacing: 1, crossAxisSpacing: 1),
       itemBuilder: (context, index) {

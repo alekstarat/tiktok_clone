@@ -266,10 +266,10 @@ class _AuthPageState extends State<AuthPage> {
                       ],
                     ),
                   ),
-                  if (state is AuthLoadingState) Container(
-                    color: Colors.black.withOpacity(0.7),
-                    child: const Center(child: LoadingScreen())
-                  )
+                  if (state is AuthLoadingState)
+                    Container(
+                        color: Colors.black.withOpacity(0.7),
+                        child: const Center(child: LoadingScreen()))
                 ],
               ),
             ),

@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from database import Database
 import uvicorn
 
@@ -28,6 +28,28 @@ def user_model(data):
                 "birth" : data[16]
             }
     )
+
+def video_model(data):
+    return JSONResponse(
+        content={
+            "id" : data[0],
+            "file" : f"http://10.0.2.2:8000/video/raw/{data[1]}",
+            "author_id" : data[2],
+            "likes" : data[3],
+            "comments" : data[4],
+            "saved" : data[5],
+            "reposts" : data[6],
+            "sound_id" : data[7]
+        }
+    )
+
+@app.get('/video/{id}')
+async def get_video(id: int):
+    try:
+        pass
+    except:
+        pass
+
 
 @app.get('/user/{id}')
 async def get_user(id: int):

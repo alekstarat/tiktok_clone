@@ -43,7 +43,6 @@ class _EnterPasswordState extends State<EnterPassword> {
               final authBloc = context.read<AuthBloc>();
               return GestureDetector(
                 onTap: () {
-                  
                       authBloc.authData
                       .addAll({"password": _passwordController.text});
                       authBloc.add(CheckAuthEvent());

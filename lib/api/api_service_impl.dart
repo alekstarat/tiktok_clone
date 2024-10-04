@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:tiktok_clone/packages/models/user_model.dart';
+import 'package:tiktok_clone/packages/models/video_model.dart';
 
 class ApiServiceImpl {
 
@@ -28,6 +29,17 @@ class ApiServiceImpl {
       var response = await dio.get("$hostUrl/user/$id");
       print(response.data);
       return UserModel.fromJson(response.data);
+    } catch (e) {
+      print(e.toString());
+      rethrow;
+    }
+  }
+
+  Future<VideoModel> getVideo(int id) async {
+    try {
+      var response = await dio.get("$hostUrl/video/$id");
+      print(response.data);
+      return VideoModel.fromJson(response.data);
     } catch (e) {
       print(e.toString());
       rethrow;

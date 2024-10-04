@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field
+
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:tiktok_clone/packages/auth_repository/auth_repository_impl.dart';
@@ -9,7 +11,6 @@ part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
-  // ignore: unused_field
   final AuthRepository _authRepository;
   final UserRepository _userRepository;
 
@@ -36,25 +37,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthInitialEvent>((event, emit) async {
       emit(AuthLoadingState());
       print(AuthLoadingState());
-      var newUser = await userRepo.getAuthenticatedUser();
-      emit(AuthenticatedState(userModel: newUser));
-      print(AuthenticatedState);
-      
+      try {
+        await userRepo.getAuthenticatedUser(userRepo.userId!).then((v) {
+          emit(AuthenticatedState(userModel: v!));
+          print(AuthenticatedState);
+        });
+      } catch (e) {
+        emit(UnauthenticatedState());
+        print(UnauthenticatedState);
+      }
     });
     on<CheckAuthEvent>((event, emit) async {
       emit(AuthLoadingState());
       print(AuthLoadingState());
-
-      if (!(authData.containsKey('password') && (authData.containsKey("phone") || authData.containsKey("email") || authData.containsKey("login")))) {
-        if (userRepo.userId == null) {
-          emit(UnauthenticatedState());
-          print(UnauthenticatedState());
-        } else {
-          emit(AuthenticatedState(userModel: await userRepo.getAuthenticatedUser()));
-          print(AuthenticatedState);
-          _userRepository.setUser();
-        }
-      } else {
         try {
           userRepo.user = await authRepo.signIn(
             authData.containsKey('login') ? authData['login'] : null,
@@ -63,14 +58,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             password: authData['password']!);
           emit(AuthenticatedState(userModel: userRepo.user!));
           print(AuthenticatedState);
-          _userRepository.setUser();
+          //_userRepository.setUser(prefs);
         } catch (e) {
           emit(UnknownState(error: e.toString()));
           print(UnknownState);
         
         }
-      }
-      
-    });
+      }  
+    );
   }
 }
