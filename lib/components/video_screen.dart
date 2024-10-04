@@ -1,17 +1,20 @@
 import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:tiktok_clone/api/api_service_impl.dart';
 import 'package:tiktok_clone/components/comments_widget.dart';
 import 'package:tiktok_clone/components/loading_screen.dart';
+import 'package:tiktok_clone/packages/models/video_model.dart';
 import 'package:tiktok_clone/pages/search_page/pages/search_page.dart';
 import 'package:video_player/video_player.dart';
-import 'package:better_player/better_player.dart';
+
 
 class VideoScreen extends StatefulWidget {
   final int index;
   final bool fromRecomendations;
+
+
 
   const VideoScreen(
       {super.key, required this.index, required this.fromRecomendations});
@@ -21,37 +24,40 @@ class VideoScreen extends StatefulWidget {
 }
 
 class _VideoScreenState extends State<VideoScreen> {
-  //late final VideoPlayerController _controller;
-  late final BetterPlayerController _controller;
+  late final VideoPlayerController _controller;
+    VideoModel? video;
   bool isPaused = false;
   double turns = 10;
+  Map<String, Object?>? authorData;
   final FocusNode _focusNode = FocusNode();
+
+  void getVideo() async {
+    authorData = await ApiServiceImpl().getProfileNameImage(widget.index);
+    video = await ApiServiceImpl().getVideo(widget.index);
+    print(video);
+    print(authorData);
+  }
 
   @override
   void initState() {
     super.initState();
-    _controller = BetterPlayerController(
-      const BetterPlayerConfiguration(),
-      // betterPlayerDataSource: BetterPlayerDataSource(
-      //   BetterPlayerDataSourceType.file, 
-      //   videoFormat: BetterPlayerVideoFormat.ss,
-      //   "/assets/videos/${widget.index}.mp4"
-      // ) ,
-    );
+
+    getVideo();
 
     
-    // _controller =
-    //     VideoPlayerController.asset('assets/videos/${widget.index}.mp4')
-    //       ..initialize().then((_) async {
-    //         setState(() {});
-    //         _controller.setLooping(true);
-    //         await _controller.play();
-    //       });
+    
+    _controller =
+        VideoPlayerController.networkUrl(Uri.parse("http://10.0.2.2:8000/video/raw/${widget.index}"), videoPlayerOptions: VideoPlayerOptions(webOptions: VideoPlayerWebOptions(controls: VideoPlayerWebOptionsControls.enabled())))
+          ..initialize().then((_) async {
+            setState(() {});
+            _controller.setLooping(true);
+            await _controller.play();
+          });
   }
 
   @override
   void dispose() {
-    //_controller.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -62,20 +68,20 @@ class _VideoScreenState extends State<VideoScreen> {
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
         trackpadScrollCausesScale: false,
-        // onTap: () async {
-        //   _focusNode.unfocus();
-        //   if (_controller.value.isPlaying) {
-        //     await _controller.pause();
-        //     setState(() {
-        //       isPaused = true;
-        //     });
-        //   } else {
-        //     await _controller.play();
-        //     setState(() {
-        //       isPaused = false;
-        //     });
-        //   }
-        // },
+        onTap: () async {
+          _focusNode.unfocus();
+          if (_controller.value.isPlaying) {
+            await _controller.pause();
+            setState(() {
+              isPaused = true;
+            });
+          } else {
+            await _controller.play();
+            setState(() {
+              isPaused = false;
+            });
+          }
+        },
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height - kToolbarHeight + 10,
@@ -83,33 +89,18 @@ class _VideoScreenState extends State<VideoScreen> {
             children: [
               Align(
                 alignment: Alignment.center,
-                // child: _controller.value.isInitialized
-                //     ? SizedBox(
-                //         height: MediaQuery.of(context).size.height -
-                //             kToolbarHeight +
-                //             10,
-                //         width: _controller.value.size.width,
-                //         child: AspectRatio(
-                //           aspectRatio: _controller.value.aspectRatio,
-                //           child: VideoPlayer(_controller),
-                //         ),
-                //       )
-                //     : const LoadingScreen(),
-                // child: AspectRatio(
-                //   aspectRatio: 16/9,
-                //   child: BetterPlayer(
-                //     controller: _controller,
-                //   ),
-                // ),
-                // child: AspectRatio(
-                //   aspectRatio: 16/9,
-                // //   child: BetterPlayer.file(
-                // //     'assets/videos/1.mp4',
-                // //     betterPlayerConfiguration: BetterPlayerConfiguration(
-
-                // //     ),
-                // //   ),
-                // // ),
+                child: _controller.value.isInitialized
+                    ? SizedBox(
+                        height: MediaQuery.of(context).size.height -
+                            kToolbarHeight +
+                            10,
+                        width: _controller.value.size.width,
+                        child: AspectRatio(
+                          aspectRatio: _controller.value.aspectRatio,
+                          child: VideoPlayer(_controller),
+                        ),
+                      )
+                    : const LoadingScreen(),
               ),
               IgnorePointer(
                 ignoring: true,
@@ -157,25 +148,25 @@ class _VideoScreenState extends State<VideoScreen> {
                   ),
                 ),
               ),
-              // Padding(
-              //   padding:
-              //       EdgeInsets.only(bottom: widget.fromRecomendations ? 0 : 30),
-              //   child: Align(
-              //     alignment: Alignment.bottomCenter,
-              //     child: SizedBox(
-              //         width: MediaQuery.of(context).size.width,
-              //         height: 2,
-              //         child: VideoProgressIndicator(
-              //           _controller,
-              //           allowScrubbing: true,
-              //           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              //           colors: VideoProgressColors(
-              //             playedColor: Colors.white,
-              //             backgroundColor: Colors.grey.shade800,
-              //           ),
-              //         )),
-              //   ),
-              // ),
+              Padding(
+                padding:
+                    EdgeInsets.only(bottom: widget.fromRecomendations ? 0 : 30),
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      height: 2,
+                      child: VideoProgressIndicator(
+                        _controller,
+                        allowScrubbing: true,
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        colors: VideoProgressColors(
+                          playedColor: Colors.white,
+                          backgroundColor: Colors.grey.shade800,
+                        ),
+                      )),
+                ),
+              ),
 
               // Лайки комменты ------------------------------------------------------
 
@@ -208,9 +199,14 @@ class _VideoScreenState extends State<VideoScreen> {
                                       Border.all(color: Colors.white, width: 1),
                                   color:
                                       const Color.fromARGB(255, 192, 168, 159)),
-                              child: const Center(
+                              child: authorData == null || authorData!['image'] == "" || authorData!['image'] == null? const Center(
                                   child: Icon(Icons.person,
-                                      color: Colors.white, size: 30)),
+                                      color: Colors.white, size: 30))
+                                    : Center(
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(90),
+                                        child: Image.network("http://10.0.2.2:8000/image/${authorData!['image']}",)),
+                                    ),
                             ),
                             Padding(
                               padding: const EdgeInsets.only(top: 30),
@@ -253,7 +249,7 @@ class _VideoScreenState extends State<VideoScreen> {
                                   blurRadius: 10)
                             ],
                           ),
-                          Text("1488",
+                          Text(video != null ? video!.likes.toString() : "",
                               style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 11,
@@ -293,7 +289,7 @@ class _VideoScreenState extends State<VideoScreen> {
                                       color: Colors.black.withOpacity(0.5),
                                       blurRadius: 10)
                                 ]),
-                            Text("52",
+                            Text(video != null ? video!.comments.length.toString() : "",
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 11,
@@ -320,7 +316,7 @@ class _VideoScreenState extends State<VideoScreen> {
                                     color: Colors.black.withOpacity(0.5),
                                     blurRadius: 10)
                               ]),
-                          Text("295",
+                          Text(video != null ? video!.saved.toString() : "",
                               style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 11,
@@ -347,7 +343,7 @@ class _VideoScreenState extends State<VideoScreen> {
                                         color: Colors.black.withOpacity(0.5),
                                         blurRadius: 10)
                                   ])),
-                          Text("109",
+                          Text(video != null ? video!.reposts.toString() : "",
                               style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 11,
@@ -379,7 +375,7 @@ class _VideoScreenState extends State<VideoScreen> {
                 padding: EdgeInsets.symmetric(
                     vertical: widget.fromRecomendations ? 16 : 46,
                     horizontal: 8),
-                child: const Align(
+                child: Align(
                   alignment: Alignment.bottomLeft,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -387,30 +383,31 @@ class _VideoScreenState extends State<VideoScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "djmis.t",
-                        style: TextStyle(
+                        authorData == null || authorData!["name"] == "" ?
+                        "" : authorData!['name'].toString() ,
+                        style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                             fontSize: 15),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 5,
                       ),
                       Row(
                         children: [
                           Text(
-                            "черепа на хате ",
-                            style: TextStyle(
+                            video != null ? video!.name : "",
+                            style: const TextStyle(
                               color: Colors.white,
                             ),
                           ),
-                          Text(
-                            "#черепа #на #хате",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          // Text(
+                          //   "#черепа #на #хате",
+                          //   style: TextStyle(
+                          //     color: Colors.white,
+                          //     fontWeight: FontWeight.bold,
+                          //   ),
+                          // ),
                         ],
                       ),
                     ],

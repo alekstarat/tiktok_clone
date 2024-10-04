@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:tiktok_clone/packages/models/user_model.dart';
 import 'package:tiktok_clone/packages/models/video_model.dart';
@@ -46,5 +48,14 @@ class ApiServiceImpl {
     }
   }
 
+  Future<Map<String, Object?>?> getProfileNameImage(int id) async {
+    try {
+      var response = await dio.get("$hostUrl/profile_name_image/$id");
+      return response.data as Map<String, Object?>?;
+    } catch (e) {
+      print(e.toString());
+      rethrow;
+    }
+  }
 
 }

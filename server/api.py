@@ -33,24 +33,64 @@ def video_model(data):
     return JSONResponse(
         content={
             "id" : data[0],
-            "file" : f"http://10.0.2.2:8000/video/raw/{data[1]}",
+            "file" : None,
             "author_id" : data[2],
             "likes" : data[3],
             "comments" : data[4],
             "saved" : data[5],
             "reposts" : data[6],
-            "sound_id" : data[7]
+            "sound_id" : data[7],
+            "name" : data[8],
         }
     )
 
+@app.get('/profile_name_image/{id}')
+async def get_profile_name_image(id: int):
+    try:
+        data = list(db.cursor.execute(f'SELECT image, name FROM Users WHERE id = {id}'))[0]
+        print(data)
+        return JSONResponse(
+            content={
+                "image" : data[0],
+                'name' : data[1]
+            }
+        )
+    except:
+        return JSONResponse(
+            content={
+                'status_code' : 400,
+                'message' : "Писяка! >:P"
+            }
+        )
+
 @app.get('/video/{id}')
 async def get_video(id: int):
-    try:
-        pass
+    try: 
+        data = list(db.cursor.execute(f"SELECT * FROM Videos WHERE id = {id}"))[0]
+        return video_model(data)
     except:
-        pass
+        return JSONResponse(
+            content={
+                'status_code' : 400,
+                'message' : 'Хуита'
+            }
+        )
 
-
+@app.get('/video/raw/{id}')
+async def get_video_raw(id: str): 
+    try:
+        return FileResponse(
+            #f"C:/Users/Sasher/Desktop/git/tiktok_clone/server/videos/{id}.mp4"
+            path=f"videos/{id}.mp4",
+            media_type='video/mp4'
+        )
+    except: 
+        return JSONResponse(
+            content={
+                "status_code": 404,
+                "message": "Гавно"
+            }
+        )
 @app.get('/user/{id}')
 async def get_user(id: int):
     try:
@@ -82,6 +122,12 @@ async def get_user(id: int):
             "status" : 400,
             'error_message' : "Что-то пошло не так"
         })
+
+@app.get('/image/{name}')
+async def get_image(name: str):
+    return FileResponse(
+        f'images/{name}'
+    )
 
 @app.post('/{method}/login')
 async def login(name: str, password: str, method: str):
