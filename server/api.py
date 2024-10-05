@@ -46,8 +46,10 @@ def video_model(data):
 
 @app.get('/profile_name_image/{id}')
 async def get_profile_name_image(id: int):
+    print(f"id = {id}")
     try:
         data = list(db.cursor.execute(f'SELECT image, name FROM Users WHERE id = {id}'))[0]
+        
         print(data)
         return JSONResponse(
             content={
@@ -55,7 +57,8 @@ async def get_profile_name_image(id: int):
                 'name' : data[1]
             }
         )
-    except:
+    except Exception as e:
+        print(e)
         return JSONResponse(
             content={
                 'status_code' : 400,

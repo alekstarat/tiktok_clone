@@ -1,20 +1,20 @@
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tiktok_clone/api/api_service_impl.dart';
 import 'package:tiktok_clone/components/comments_widget.dart';
 import 'package:tiktok_clone/components/loading_screen.dart';
+import 'package:tiktok_clone/packages/models/comment_model.dart';
 import 'package:tiktok_clone/packages/models/video_model.dart';
+import 'package:tiktok_clone/packages/user_repository/user_repository_impl.dart';
 import 'package:tiktok_clone/pages/search_page/pages/search_page.dart';
 import 'package:video_player/video_player.dart';
-
 
 class VideoScreen extends StatefulWidget {
   final int index;
   final bool fromRecomendations;
-
-
 
   const VideoScreen(
       {super.key, required this.index, required this.fromRecomendations});
@@ -25,15 +25,15 @@ class VideoScreen extends StatefulWidget {
 
 class _VideoScreenState extends State<VideoScreen> {
   late final VideoPlayerController _controller;
-    VideoModel? video;
+  VideoModel? video;
   bool isPaused = false;
   double turns = 10;
   Map<String, Object?>? authorData;
   final FocusNode _focusNode = FocusNode();
 
   void getVideo() async {
-    authorData = await ApiServiceImpl().getProfileNameImage(widget.index);
     video = await ApiServiceImpl().getVideo(widget.index);
+    authorData = await ApiServiceImpl().getProfileNameImage(video!.authorId);
     print(video);
     print(authorData);
   }
@@ -44,15 +44,16 @@ class _VideoScreenState extends State<VideoScreen> {
 
     getVideo();
 
-    
-    
-    _controller =
-        VideoPlayerController.networkUrl(Uri.parse("http://10.0.2.2:8000/video/raw/${widget.index}"), videoPlayerOptions: VideoPlayerOptions(webOptions: VideoPlayerWebOptions(controls: VideoPlayerWebOptionsControls.enabled())))
-          ..initialize().then((_) async {
-            setState(() {});
-            _controller.setLooping(true);
-            await _controller.play();
-          });
+    _controller = VideoPlayerController.networkUrl(
+        Uri.parse("http://10.0.2.2:8000/video/raw/${widget.index}"),
+        videoPlayerOptions: VideoPlayerOptions(
+            webOptions: VideoPlayerWebOptions(
+                controls: VideoPlayerWebOptionsControls.enabled())))
+      ..initialize().then((_) async {
+        setState(() {});
+        _controller.setLooping(true);
+        await _controller.play();
+      });
   }
 
   @override
@@ -123,13 +124,12 @@ class _VideoScreenState extends State<VideoScreen> {
                 child: Container(
                   width: double.infinity,
                   height: 250,
-                  decoration:
-                      BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Colors.black.withOpacity(0.5), Colors.transparent, Colors.transparent],
-                          transform: const GradientRotation(pi/2)
-                        )
-                      ),
+                  decoration: BoxDecoration(
+                      gradient: LinearGradient(colors: [
+                    Colors.black.withOpacity(0.5),
+                    Colors.transparent,
+                    Colors.transparent
+                  ], transform: const GradientRotation(pi / 2))),
                 ),
               ),
               Align(
@@ -138,19 +138,18 @@ class _VideoScreenState extends State<VideoScreen> {
                   child: Container(
                     width: double.infinity,
                     height: 250,
-                    decoration:
-                        BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Colors.black.withOpacity(0.5), Colors.transparent, Colors.transparent],
-                            transform: const GradientRotation(3*pi/2)
-                          )
-                        ),
+                    decoration: BoxDecoration(
+                        gradient: LinearGradient(colors: [
+                      Colors.black.withOpacity(0.5),
+                      Colors.transparent,
+                      Colors.transparent
+                    ], transform: const GradientRotation(3 * pi / 2))),
                   ),
                 ),
               ),
               Padding(
-                padding:
-                    EdgeInsets.only(bottom: widget.fromRecomendations ? 0 : 30),
+                padding: EdgeInsets.only(
+                    bottom: widget.fromRecomendations ? 0 : 30),
                 child: Align(
                   alignment: Alignment.bottomCenter,
                   child: SizedBox(
@@ -167,9 +166,9 @@ class _VideoScreenState extends State<VideoScreen> {
                       )),
                 ),
               ),
-
+    
               // Лайки комменты ------------------------------------------------------
-
+    
               Padding(
                 padding: EdgeInsets.symmetric(
                     horizontal: 8,
@@ -195,17 +194,23 @@ class _VideoScreenState extends State<VideoScreen> {
                                         blurRadius: 5)
                                   ],
                                   shape: BoxShape.circle,
-                                  border:
-                                      Border.all(color: Colors.white, width: 1),
-                                  color:
-                                      const Color.fromARGB(255, 192, 168, 159)),
-                              child: authorData == null || authorData!['image'] == "" || authorData!['image'] == null? const Center(
-                                  child: Icon(Icons.person,
-                                      color: Colors.white, size: 30))
-                                    : Center(
+                                  border: Border.all(
+                                      color: Colors.white, width: 1),
+                                  color: const Color.fromARGB(
+                                      255, 192, 168, 159)),
+                              child: authorData == null ||
+                                      authorData!['image'] == "" ||
+                                      authorData!['image'] == null
+                                  ? const Center(
+                                      child: Icon(Icons.person,
+                                          color: Colors.white, size: 30))
+                                  : Center(
                                       child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(90),
-                                        child: Image.network("http://10.0.2.2:8000/image/${authorData!['image']}",)),
+                                          borderRadius:
+                                              BorderRadius.circular(90),
+                                          child: Image.network(
+                                            "http://10.0.2.2:8000/image/${authorData!['image']}",
+                                          )),
                                     ),
                             ),
                             Padding(
@@ -219,7 +224,8 @@ class _VideoScreenState extends State<VideoScreen> {
                                     shape: BoxShape.circle,
                                     boxShadow: [
                                       BoxShadow(
-                                          color: Colors.black.withOpacity(0.5),
+                                          color:
+                                              Colors.black.withOpacity(0.5),
                                           blurRadius: 5)
                                     ],
                                   ),
@@ -275,7 +281,11 @@ class _VideoScreenState extends State<VideoScreen> {
                                   onTap: () {
                                     FocusScope.of(context).unfocus();
                                   },
-                                  child: const CommentsWidget()));
+                                  child: CommentsWidget(
+                                    comments: video != null
+                                        ? video!.comments
+                                        : <CommentModel>[],
+                                  )));
                         },
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -289,7 +299,10 @@ class _VideoScreenState extends State<VideoScreen> {
                                       color: Colors.black.withOpacity(0.5),
                                       blurRadius: 10)
                                 ]),
-                            Text(video != null ? video!.comments.length.toString() : "",
+                            Text(
+                                video != null
+                                    ? video!.comments.length.toString()
+                                    : "",
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 11,
@@ -335,7 +348,8 @@ class _VideoScreenState extends State<VideoScreen> {
                         children: [
                           Transform.rotate(
                               angle: -pi / 2,
-                              child: Icon(CupertinoIcons.arrow_turn_right_down,
+                              child: Icon(
+                                  CupertinoIcons.arrow_turn_right_down,
                                   color: Colors.white,
                                   size: 30,
                                   shadows: [
@@ -383,8 +397,9 @@ class _VideoScreenState extends State<VideoScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        authorData == null || authorData!["name"] == "" ?
-                        "" : authorData!['name'].toString() ,
+                        authorData == null || authorData!["name"] == ""
+                            ? ""
+                            : authorData!['name'].toString(),
                         style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -454,7 +469,7 @@ class _VideoScreenState extends State<VideoScreen> {
                     ),
                   ),
                 ),
-
+    
               if (!widget.fromRecomendations)
                 Positioned(
                   bottom: !_focusNode.hasPrimaryFocus ||
@@ -483,8 +498,8 @@ class _VideoScreenState extends State<VideoScreen> {
                                 scrollDirection: Axis.horizontal,
                                 itemCount: 20,
                                 shrinkWrap: true,
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 16),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16),
                                 itemBuilder: (context, index) {
                                   return const Icon(Icons.emoji_emotions,
                                       color: Colors.black, size: 30);
@@ -495,7 +510,8 @@ class _VideoScreenState extends State<VideoScreen> {
                             height: kToolbarHeight / 1.5,
                             width: MediaQuery.of(context).size.width,
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
                               mainAxisSize: MainAxisSize.max,
                               children: [
                                 const CircleAvatar(
@@ -505,7 +521,8 @@ class _VideoScreenState extends State<VideoScreen> {
                                       color: Colors.white),
                                 ),
                                 SizedBox(
-                                  width: MediaQuery.of(context).size.width - 52,
+                                  width:
+                                      MediaQuery.of(context).size.width - 52,
                                   height: 30,
                                   child: CupertinoTextField(
                                     focusNode: _focusNode,
@@ -532,7 +549,8 @@ class _VideoScreenState extends State<VideoScreen> {
                                               Icons.alternate_email_rounded,
                                               color: Colors.black,
                                             ),
-                                            Icon(Icons.emoji_emotions_outlined),
+                                            Icon(Icons
+                                                .emoji_emotions_outlined),
                                             Icon(
                                               CupertinoIcons.gift,
                                               color: Colors.black,
@@ -570,7 +588,11 @@ class _VideoScreenState extends State<VideoScreen> {
                                 color: Colors.white, size: 28)),
                         GestureDetector(
                           onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const SearchPage()));
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const SearchPage()));
                           },
                           child: Container(
                             height: 28,
@@ -583,10 +605,11 @@ class _VideoScreenState extends State<VideoScreen> {
                                     width: 0.35)),
                             child: Center(
                               child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 10),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10),
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.center,
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
@@ -610,8 +633,8 @@ class _VideoScreenState extends State<VideoScreen> {
                                           width: 1,
                                           height: 15,
                                           decoration: BoxDecoration(
-                                              color:
-                                                  Colors.white.withOpacity(0.5),
+                                              color: Colors.white
+                                                  .withOpacity(0.5),
                                               borderRadius:
                                                   BorderRadius.circular(90)),
                                         ),

@@ -3,7 +3,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nested_scroll_views/material.dart';
+import 'package:tiktok_clone/auth/bloc/auth_bloc/auth_bloc.dart';
+import 'package:tiktok_clone/packages/auth_repository/auth_repository_impl.dart';
 import 'package:tiktok_clone/packages/user_repository/user_repository_impl.dart';
+import 'package:tiktok_clone/pages/home_screen/home_bloc/home_bloc.dart';
 import 'package:tiktok_clone/pages/home_screen/pages/create_video_page/create_video_page.dart';
 import 'package:tiktok_clone/pages/home_screen/pages/friends_page/friends_page.dart';
 import 'package:tiktok_clone/pages/home_screen/pages/main_page/main_page.dart';
@@ -65,7 +68,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               children: [
                 Align(
                   alignment: Alignment.topCenter,
-                  child: pages[currPage - 1],
+                  child: RepositoryProvider(
+                    create: (_) => context.read<UserRepository>(),
+                    child: BlocProvider(
+                      create: (context) => HomeBloc(userRepo: context.read<UserRepository>()),
+                      child: pages[currPage - 1],
+                    ),
+                  ),
                 ),
                 Align(
                     alignment: Alignment.bottomCenter,
@@ -79,9 +88,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   color: currPage == 3 || currPage == 4
                                       ? Colors.grey.shade300
                                       : Colors.grey.shade800,
-                                  width: currPage == 3 || currPage == 4
-                                      ? 1
-                                      : 2))),
+                                  width:
+                                      currPage == 3 || currPage == 4 ? 1 : 2))),
                       height: kToolbarHeight - 10,
                       width: MediaQuery.of(context).size.width,
                       child: Padding(
@@ -203,10 +211,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                                     BorderRadius.circular(9)),
                                             child: Icon(
                                               Icons.add,
-                                              color: currPage == 3 ||
-                                                      currPage == 4
-                                                  ? Colors.white
-                                                  : Colors.black,
+                                              color:
+                                                  currPage == 3 || currPage == 4
+                                                      ? Colors.white
+                                                      : Colors.black,
                                               size: 20,
                                               grade: -25,
                                             ),

@@ -58,6 +58,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             password: authData['password']!);
           emit(AuthenticatedState(userModel: userRepo.user!));
           print(AuthenticatedState);
+          userRepo.setUser();
           //_userRepository.setUser(prefs);
         } catch (e) {
           emit(UnknownState(error: e.toString()));

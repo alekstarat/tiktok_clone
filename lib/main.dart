@@ -22,25 +22,23 @@ class MainApp extends StatefulWidget {
 
 class _MainAppState extends State<MainApp> {
   final AuthRepository authRepo = const AuthRepository();
-  final UserRepository userRepo = UserRepository();
+  late final UserRepository userRepo;
   late final SharedPreferences _prefs;
   bool prefsLoaded = false;
 
   @override
   void initState() {
-    
     super.initState();
     SharedPreferences.getInstance().then((v) {
       setState(() {
         _prefs = v;
         print("prefs loaded");
+        userRepo = UserRepository(_prefs);
         userRepo.userId = _prefs.getInt("userId");
         prefsLoaded = true;
-        
       });
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -57,19 +55,25 @@ class _MainAppState extends State<MainApp> {
         debugShowCheckedModeBanner: false,
         home: RepositoryProvider.value(
           value: authRepo,
-          child: prefsLoaded ? BlocProvider(
-              lazy: false,
-              create: (_) => AuthBloc(authRepo: authRepo, userRepo: userRepo)
-                ..add(AuthInitialEvent()),
-              child: BlocBuilder<AuthBloc, AuthState>(
-                builder: (context, state) {
-                  if (state is! AuthenticatedState) {
-                      return const AuthPage();
-                    } else {
-                      return const HomeScreen();
-                    }
-                },
-              )) : const Center(child: LoadingScreen()),
+          child: prefsLoaded
+              ? BlocProvider(
+                  lazy: false,
+                  create: (_) =>
+                      AuthBloc(authRepo: authRepo, userRepo: userRepo)
+                        ..add(AuthInitialEvent()),
+                  child: BlocBuilder<AuthBloc, AuthState>(
+                    builder: (context, state) {
+                      if (state is! AuthenticatedState) {
+                        return const AuthPage();
+                      } else {
+                        return RepositoryProvider(
+                          create: (_) => context.read<UserRepository>(),
+                          child: const HomeScreen(),
+                        );
+                      }
+                    },
+                  ))
+              : const Center(child: LoadingScreen()),
         ));
   }
 }

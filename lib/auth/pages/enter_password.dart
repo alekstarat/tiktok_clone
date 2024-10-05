@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tiktok_clone/auth/bloc/auth_bloc/auth_bloc.dart';
+import 'package:tiktok_clone/packages/user_repository/user_repository_impl.dart';
 import 'package:tiktok_clone/pages/home_screen/home_screen.dart';
 
 class EnterPassword extends StatefulWidget {
@@ -41,35 +42,42 @@ class _EnterPasswordState extends State<EnterPassword> {
           child: BlocBuilder<AuthBloc, AuthState>(
             builder: (context, state) {
               final authBloc = context.read<AuthBloc>();
-              return GestureDetector(
-                onTap: () {
-                      authBloc.authData
-                      .addAll({"password": _passwordController.text});
-                      authBloc.add(CheckAuthEvent());
+              return BlocListener<AuthBloc, AuthState>(
+                listener: (context, state) {
                   if (state is AuthenticatedState) {
                     Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const HomeScreen()),
-                      (r) => r.isCurrent);
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => RepositoryProvider(
+                                  create: (context) => context.read<UserRepository>(),
+                                  child: const HomeScreen(),
+                                )),
+                        (r) => r.isCurrent);
                   }
                 },
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 100),
-                  opacity: is8chars ? 1.0 : 0.4,
-                  child: Container(
-                    decoration: BoxDecoration(
-                        color: Colors.red[600],
-                        borderRadius: BorderRadius.circular(8)),
-                    width: MediaQuery.of(context).size.width * 0.85,
-                    height: kToolbarHeight - 5,
-                    child: const Center(
-                      child: Text(
-                        "Продолжить",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18),
+                child: GestureDetector(
+                  onTap: () {
+                    authBloc.authData
+                        .addAll({"password": _passwordController.text});
+                    authBloc.add(CheckAuthEvent());
+                  },
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 100),
+                    opacity: is8chars ? 1.0 : 0.4,
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Colors.red[600],
+                          borderRadius: BorderRadius.circular(8)),
+                      width: MediaQuery.of(context).size.width * 0.85,
+                      height: kToolbarHeight - 5,
+                      child: const Center(
+                        child: Text(
+                          "Продолжить",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18),
+                        ),
                       ),
                     ),
                   ),

@@ -6,9 +6,12 @@ class UserRepository {
 
   UserModel? user;
   int? userId;
+  SharedPreferences? prefs;
 
-  void setUser(SharedPreferences prefs) async {
-    await prefs.setInt("userId", user!.id);
+  UserRepository(this.prefs);
+
+  void setUser() async {
+    await prefs!.setInt("userId", user!.id);
     print("Аккаунт сохранён: ${user!.name}");
   }
 

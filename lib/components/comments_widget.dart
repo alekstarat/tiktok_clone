@@ -1,12 +1,28 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tiktok_clone/components/comment_tile.dart';
 
 class CommentsWidget extends StatelessWidget {
 
   //final FocusNode focusNode;
 
-  const CommentsWidget({super.key});
+  final List<dynamic> comments;
+
+  const CommentsWidget({super.key, required this.comments});
+
+  static const List<String> icons = [
+    'assets/icons/emodji_big_long_mouth.svg', 
+    'assets/icons/emoji_;P.svg', 
+    'assets/icons/emoji_excited.svg', 
+    'assets/icons/emoji_glasses_kiss.svg', 
+    'assets/icons/emoji_gore.svg',
+    'assets/icons/emoji_love.svg',
+    'assets/icons/emoji_shock.svg',
+    'assets/icons/emoji_silent.svg',
+    'assets/icons/emoji_smirk.svg',
+    'assets/icons/emoji_upset.svg'
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +40,9 @@ class CommentsWidget extends StatelessWidget {
                 const SizedBox(
                   width: 17,
                 ),
-                const Text(
-                  "52 комментария",
-                  style: TextStyle(
+                Text(
+                  comments.length.toString() + (int.parse(comments.length.toString()[0]) == 0 ? " комментариев" : (int.parse(comments.length.toString()[0]) <= 4 ? " комментария" : " комментариев")),
+                  style: const TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.1
@@ -54,9 +70,9 @@ class CommentsWidget extends StatelessWidget {
               child: ListView.builder(
                 padding: const EdgeInsets.only(bottom: 16),
                 shrinkWrap: true,
-                itemCount: 10,
+                itemCount: comments.length,
                 itemBuilder: (context, index) {
-                  return CommentTile(date: DateTime.now(), name: "Ебалбек", text: "nike pro", hasResponse: true, likes: 52);
+                  return CommentTile(date: comments[index].date, name: "Ебалбек", text: "nike pro", hasResponse: false, likes: 0);
                 }
               ),
             ),
@@ -70,11 +86,11 @@ class CommentsWidget extends StatelessWidget {
                 child: ListView.separated(
                   separatorBuilder: (context, index) => const SizedBox(width: 16,),
                   scrollDirection: Axis.horizontal,
-                  itemCount: 20,
+                  itemCount: icons.length,
                   shrinkWrap: true,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemBuilder: (context, index) {
-                    return const Icon(Icons.emoji_emotions, color: Colors.black, size: 30);
+                    return SvgPicture.asset(icons[index]);
                   }
                 ),
               ),
