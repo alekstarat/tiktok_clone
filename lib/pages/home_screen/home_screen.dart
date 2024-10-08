@@ -44,14 +44,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         create: (_) => context.read<UserRepository>(),
         child: MainPage(
           mainController: _mainController,
+          onProfileTap: () {
+            _tabController.animateTo(1);
+          },
         ),
       ),
       const FriendsPage(),
       const MessagesPage(),
       RepositoryProvider(
         create: (_) => context.read<UserRepository>(),
-        child: const ProfilePage(
-          id: 0,
+        child: ProfilePage(
+          id: context.read<UserRepository>().userId ?? 0,
           fromVideo: false,
         ),
       )
@@ -310,7 +313,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ],
               ),
               ProfilePage(
-                id: 0,
+                id: 1,
                 fromVideo: true,
                 onBack: () {
                   _tabController.animateTo(0);

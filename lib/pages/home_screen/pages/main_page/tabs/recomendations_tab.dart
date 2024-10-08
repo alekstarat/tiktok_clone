@@ -6,7 +6,10 @@ import 'package:tiktok_clone/packages/user_repository/user_repository_impl.dart'
 import 'package:tiktok_clone/pages/home_screen/home_bloc/home_bloc.dart';
 
 class RecomendationsTab extends StatefulWidget {
-  const RecomendationsTab({super.key});
+
+  final Function onProfileTap;
+
+  const RecomendationsTab({super.key, required this.onProfileTap});
 
   @override
   State<RecomendationsTab> createState() => _RecomendationsTabState();
@@ -34,7 +37,7 @@ class _RecomendationsTabState extends State<RecomendationsTab>
                 child: BlocProvider(
                   create: (_) => context.read<HomeBloc>(),
                   child:
-                      VideoScreen(index: ids[index], fromRecomendations: true),
+                      VideoScreen(index: ids[index], fromRecomendations: true, onProfileTap: widget.onProfileTap,),
                 ),
               )));
     });

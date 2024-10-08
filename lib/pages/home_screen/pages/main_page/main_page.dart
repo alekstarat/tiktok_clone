@@ -8,9 +8,12 @@ import 'package:tiktok_clone/pages/home_screen/pages/main_page/tabs/subscription
 import 'package:tiktok_clone/pages/search_page/pages/search_page.dart';
 
 class MainPage extends StatefulWidget {
+
+  final Function onProfileTap;
+
   final TabController? mainController;
 
-  const MainPage({super.key, this.mainController});
+  const MainPage({super.key, this.mainController, required this.onProfileTap});
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -46,7 +49,7 @@ class _MainPageState extends State<MainPage>
                           const SubscriptionsTab(),
                           RepositoryProvider(
                             create: (_) => context.read<UserRepository>(),
-                            child: const RecomendationsTab(),
+                            child: RecomendationsTab(onProfileTap: widget.onProfileTap,),
                           ),
                         ]),
                     Align(

@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nested_scroll_views/material.dart';
+import 'package:tiktok_clone/api/api_service_impl.dart';
 import 'package:tiktok_clone/auth/bloc/auth_bloc/auth_bloc.dart';
 import 'package:tiktok_clone/auth/pages/auth_page.dart';
 import 'package:tiktok_clone/packages/auth_repository/auth_repository_impl.dart';
+import 'package:tiktok_clone/packages/models/user_model.dart';
 import 'package:tiktok_clone/packages/user_repository/user_repository_impl.dart';
 import 'package:tiktok_clone/pages/home_screen/pages/profile_page/components/bookmark_tab.dart';
 import 'package:tiktok_clone/pages/home_screen/pages/profile_page/components/videos_tab.dart';
@@ -27,13 +29,33 @@ class _ProfilePageState extends State<ProfilePage>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   late final TabController _tabController;
   late final Widget tab1;
+  UserModel? usr;
   bool filterPopular = false;
+  bool isMyProfile = false;
 
   double currentExtent = 0.0;
+
+  void getUser() async {
+    if (widget.fromVideo || widget.id != context.read<UserRepository>().userId) {
+      await ApiServiceImpl().getAuthenticatedUser(widget.id).then((v) {
+        setState(() {
+          usr = v;
+          print(v);
+        });
+      });
+    } else {
+      setState(() {
+        usr = context.read<UserRepository>().user;
+      });
+    }
+    
+  }
 
   @override
   void initState() {
     super.initState();
+    getUser();
+    isMyProfile = widget.id == context.read<UserRepository>().userId;
     _tabController = TabController(length: 5, vsync: this);
     tab1 = SizedBox(
       width: 35,
@@ -153,8 +175,8 @@ class _ProfilePageState extends State<ProfilePage>
       child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
           if (state is AuthenticatedState) {
-            var usr = context.read<UserRepository>().user!;
-
+            //var usr = context.read<UserRepository>().user!;
+            //var usr = ApiServiceImpl().getAuthenticatedUser(widget.id);
             return Scaffold(
                 extendBodyBehindAppBar: true,
                 extendBody: false,
@@ -314,14 +336,14 @@ class _ProfilePageState extends State<ProfilePage>
                                 ),
                               )
                             ],
-                            title: Row(
+                            title: isMyProfile ? Row(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Text(usr.name ?? "",
+                                Text(usr != null ? usr!.name! : "",
                                     maxLines:
                                         1, //overflow:TextOverflow.ellipsis,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         color: Colors.black,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18,
@@ -379,7 +401,7 @@ class _ProfilePageState extends State<ProfilePage>
                                                             size: 23)),
                                                   ),
                                                   title: Text(
-                                                      usr.login,
+                                                      usr != null ? usr!.login : "",
                                                       style: const TextStyle(
                                                           color: Colors.black,
                                                           fontFamily: 'PTSans',
@@ -433,7 +455,7 @@ class _ProfilePageState extends State<ProfilePage>
                                       size: 25),
                                 )
                               ],
-                            ),
+                            ) : null,
                             flexibleSpace: FlexibleSpaceBar(
                               collapseMode: CollapseMode.pin,
                               expandedTitleScale: 1,
@@ -452,8 +474,8 @@ class _ProfilePageState extends State<ProfilePage>
                                             radius: 45,
                                             backgroundColor:
                                                 Colors.black.withOpacity(0.7),
-                                            child: usr.image == null ||
-                                                    usr.image == ""
+                                            child: usr != null ? usr!.image == null ||
+                                                    usr!.image == ""
                                                 ? const Icon(
                                                     CupertinoIcons.person_solid,
                                                     color: Colors.white,
@@ -465,13 +487,17 @@ class _ProfilePageState extends State<ProfilePage>
                                                           BorderRadius.circular(
                                                               90),
                                                       child: Image.network(
-                                                          'http://10.0.2.2:8000/image/${usr.image}'),
+                                                          'http://10.0.2.2:8000/image/${usr!.image}'),
                                                     ),
+                                                  ) : const Icon(
+                                                    CupertinoIcons.person_solid,
+                                                    color: Colors.white,
+                                                    size: 45,
                                                   ),
                                           ),
                                           Align(
                                             alignment: Alignment.bottomRight,
-                                            child: Container(
+                                            child: isMyProfile ? Container(
                                               width: 30,
                                               height: 30,
                                               decoration: BoxDecoration(
@@ -485,7 +511,7 @@ class _ProfilePageState extends State<ProfilePage>
                                                     color: Colors.white,
                                                     size: 20),
                                               ),
-                                            ),
+                                            ) : null,
                                           )
                                         ],
                                       ),
@@ -494,9 +520,9 @@ class _ProfilePageState extends State<ProfilePage>
                                   Center(
                                     child: Padding(
                                       padding:
-                                          EdgeInsets.symmetric(vertical: 3),
-                                      child: Text("@${usr.login}",
-                                          style: TextStyle(
+                                          const EdgeInsets.symmetric(vertical: 3),
+                                      child: Text(usr != null ? "@${usr!.login}" : "",
+                                          style: const TextStyle(
                                               letterSpacing: 0,
                                               color: Colors.black,
                                               fontSize: 15,
@@ -515,8 +541,8 @@ class _ProfilePageState extends State<ProfilePage>
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
                                                 Text(
-                                                    usr.subscriptions.length
-                                                        .toString(),
+                                                    usr != null ? usr!.subscriptions.length
+                                                        .toString() : "",
                                                     style: const TextStyle(
                                                         letterSpacing: 0,
                                                         color: Colors.black,
@@ -541,8 +567,8 @@ class _ProfilePageState extends State<ProfilePage>
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
                                               Text(
-                                                  usr.subscribers.length
-                                                      .toString(),
+                                                  usr != null ? usr!.subscribers.length
+                                                      .toString() : "",
                                                   style: const TextStyle(
                                                       letterSpacing: 0,
                                                       color: Colors.black,
@@ -595,7 +621,7 @@ class _ProfilePageState extends State<ProfilePage>
                                     child: Padding(
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 5),
-                                      child: Row(
+                                      child: isMyProfile ? Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Container(
@@ -661,11 +687,46 @@ class _ProfilePageState extends State<ProfilePage>
                                                     size: 20)),
                                           )
                                         ],
+                                      ) : Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const SizedBox(height: 3,),
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.red[600],
+                                              borderRadius: BorderRadius.circular(8)
+                                            ),
+                                            width: 100,
+                                            height: kToolbarHeight/ 2 + 5,
+                                            child: const Center(
+                                              child: Text(
+                                                "Подписаться",
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 12
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 3,),
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey[300],
+                                              borderRadius: BorderRadius.circular(8)
+                                            ),
+                                            width: kToolbarHeight / 2 + 5,
+                                            height: kToolbarHeight / 2 + 5,
+                                            child: const Center(
+                                              child: Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black, size: 15),
+                                            ),
+                                          )
+                                        ],
                                       ),
                                     ),
                                   ),
                                   Center(
-                                    child: Text(usr.description ?? "",
+                                    child: Text(usr != null ? usr!.description ?? "" : "",
                                         style: const TextStyle(
                                             letterSpacing: 0,
                                             color: Colors.black,
@@ -684,8 +745,8 @@ class _ProfilePageState extends State<ProfilePage>
                           StretchingOverscrollIndicator(
                               axisDirection: AxisDirection.up,
                               child: VideosTab(
-                                videos: List.generate(
-                                    usr.videos.length, (i) => usr.videos[i]),
+                                videos: usr != null ? List.generate(
+                                    usr!.videos.length, (i) => usr!.videos[i]) : [],
                                 isHidden: false,
                               )),
                           const StretchingOverscrollIndicator(
@@ -697,8 +758,8 @@ class _ProfilePageState extends State<ProfilePage>
                           StretchingOverscrollIndicator(
                               axisDirection: AxisDirection.up,
                               child: VideosTab(
-                                videos: List.generate(
-                                    usr.reposts.length, (i) => usr.reposts[i]),
+                                videos: usr != null ? List.generate(
+                                    usr!.reposts.length, (i) => usr!.reposts[i]) : [],
                                 isHidden: false,
                               )),
                           const StretchingOverscrollIndicator(
@@ -707,8 +768,8 @@ class _ProfilePageState extends State<ProfilePage>
                           StretchingOverscrollIndicator(
                               axisDirection: AxisDirection.up,
                               child: VideosTab(
-                                videos: List.generate(usr.likedVideos.length,
-                                    (i) => usr.likedVideos[i]),
+                                videos: usr != null ? List.generate(usr!.likedVideos.length,
+                                    (i) => usr!.likedVideos[i]) : [],
                                 isHidden: false,
                               )),
                         ],

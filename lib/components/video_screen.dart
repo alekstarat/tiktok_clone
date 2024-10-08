@@ -19,9 +19,10 @@ import 'package:video_player/video_player.dart';
 class VideoScreen extends StatefulWidget {
   final int index;
   final bool fromRecomendations;
+  final Function onProfileTap;
 
   const VideoScreen(
-      {super.key, required this.index, required this.fromRecomendations});
+      {super.key, required this.index, required this.fromRecomendations, required this.onProfileTap});
 
   @override
   State<VideoScreen> createState() => _VideoScreenState();
@@ -236,38 +237,41 @@ class _VideoScreenState extends State<VideoScreen> {
                                     child: Stack(
                                       fit: StackFit.passthrough,
                                       children: [
-                                        Container(
-                                          height: 35,
-                                          width: 35,
-                                          decoration: BoxDecoration(
-                                              boxShadow: [
-                                                BoxShadow(
-                                                    color: Colors.black
-                                                        .withOpacity(0.5),
-                                                    blurRadius: 5)
-                                              ],
-                                              shape: BoxShape.circle,
-                                              border: Border.all(
-                                                  color: Colors.white,
-                                                  width: 1),
-                                              color: const Color.fromARGB(
-                                                  255, 192, 168, 159)),
-                                          child: authorData == null ||
-                                                  authorData!['image'] == "" ||
-                                                  authorData!['image'] == null
-                                              ? const Center(
-                                                  child: Icon(Icons.person,
-                                                      color: Colors.white,
-                                                      size: 30))
-                                              : Center(
-                                                  child: ClipRRect(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              90),
-                                                      child: Image.network(
-                                                        "http://10.0.2.2:8000/image/${authorData!['image']}",
-                                                      )),
-                                                ),
+                                        GestureDetector(
+                                          onTap: () => widget.onProfileTap(),
+                                          child: Container(
+                                            height: 35,
+                                            width: 35,
+                                            decoration: BoxDecoration(
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                      color: Colors.black
+                                                          .withOpacity(0.5),
+                                                      blurRadius: 5)
+                                                ],
+                                                shape: BoxShape.circle,
+                                                border: Border.all(
+                                                    color: Colors.white,
+                                                    width: 1),
+                                                color: const Color.fromARGB(
+                                                    255, 192, 168, 159)),
+                                            child: authorData == null ||
+                                                    authorData!['image'] == "" ||
+                                                    authorData!['image'] == null
+                                                ? const Center(
+                                                    child: Icon(Icons.person,
+                                                        color: Colors.white,
+                                                        size: 30))
+                                                : Center(
+                                                    child: ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                                90),
+                                                        child: Image.network(
+                                                          "http://10.0.2.2:8000/image/${authorData!['image']}",
+                                                        )),
+                                                  ),
+                                          ),
                                         ),
                                         Padding(
                                           padding:

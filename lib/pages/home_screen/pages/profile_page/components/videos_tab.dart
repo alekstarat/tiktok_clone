@@ -49,6 +49,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
                                   return VideoScreen(
                                     index: widget.videos[index],
                                     fromRecomendations: false,
+                                    onProfileTap: () {},
                                   );
                                 },
                               ),
