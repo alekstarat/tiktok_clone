@@ -4,7 +4,7 @@ class VideoModel {
   final int id;
   final String name;
   final String? file;
-  final int authorId, likes, saved, reposts, soundId;
+  final int authorId, likes, saved, reposts, soundId, views;
   final List<dynamic> comments;
 
   VideoModel(
@@ -16,7 +16,8 @@ class VideoModel {
       required this.saved,
       required this.reposts,
       required this.soundId,
-      required this.comments
+      required this.comments,
+      required this.views
     });
 
   static var empty = VideoModel(
@@ -27,13 +28,14 @@ class VideoModel {
     likes: 0, saved: 0, 
     reposts: 0, 
     soundId: 0, 
-    comments: []
+    comments: [],
+    views: 0
   );
 
   VideoModel copyWith({
     int? id,
     String? file, name,
-    int? authorId, likes, saved, reposts, soundId,
+    int? authorId, likes, saved, reposts, soundId, views,
     List<dynamic>? comments
   }) {
     return VideoModel(
@@ -45,7 +47,8 @@ class VideoModel {
       saved: saved ?? this.saved,
       reposts: reposts ?? this.reposts,
       soundId : soundId ?? this.soundId,
-      comments: comments ?? this.comments
+      comments: comments ?? this.comments,
+      views: views ?? this.views,
     );
   }
 
@@ -58,7 +61,8 @@ class VideoModel {
     saved: json['saved']! as int,
     reposts: json['reposts']! as int,
     soundId: json['sound_id']! as int,
-    comments: jsonDecode(json['comments']! as String) as List<dynamic>
+    comments: jsonDecode(json['comments']! as String) as List<dynamic>,
+    views: json['views']! as int,
   );
 
   Map<String, Object?> toJson() {
@@ -71,7 +75,8 @@ class VideoModel {
       "saved" : saved,
       "reposts" : reposts,
       "sound_id" : soundId,
-      "comments" : comments
+      "comments" : comments,
+      "views" : views
     };
   }
 

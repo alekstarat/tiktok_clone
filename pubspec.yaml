@@ -7,7 +7,6 @@ environment:
   sdk: '>=3.4.3 <4.0.0'
 
 dependencies:
-  better_player: ^0.0.84
   carousel_slider: ^5.0.0
   cupertino_icons: ^1.0.8
   dio: ^5.7.0

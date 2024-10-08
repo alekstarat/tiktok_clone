@@ -24,6 +24,24 @@ class ApiServiceImpl {
     }
   }
 
+  Future<UserModel?> registration(String password, birth, String? phone, login, email) async {
+    try {
+      var response = await dio.post(
+        "$hostUrl/${phone != null ? "phone" : login != null ? "login" : email != null ? "email" : {throw Exception("Некорректный запрос")}}/registration",
+        queryParameters: {
+          'name' : phone ?? (login ?? (email)),
+          'password' : password,
+          'birth' : birth
+        }
+      );
+      print(response.data);
+      return UserModel.fromJson(response.data);
+    } catch (e) {
+      print(e.toString());
+      rethrow;
+    }
+  }
+
   Future<UserModel> getAuthenticatedUser(int id) async {
     try {
       var response = await dio.get("$hostUrl/user/$id");
@@ -40,6 +58,36 @@ class ApiServiceImpl {
       var response = await dio.get("$hostUrl/video/$id");
       print(response.data);
       return VideoModel.fromJson(response.data);
+    } catch (e) {
+      print(e.toString());
+      rethrow;
+    }
+  }
+
+  Future<void> setView(int videoId) async {
+    try {
+      await dio.post("$hostUrl/update/views?videoId=$videoId");
+      print('view updated!');
+    } catch (e) {
+      print(e.toString());
+      rethrow;
+    }
+  }
+
+  Future<void> setLike(int videoId, userId, String value) async {
+    try {
+      await dio.post("$hostUrl/set/like?userId=$userId&videoId=$videoId&value=$value");
+      print("liked!");
+    } catch (e) {
+      print(e.toString());
+      rethrow;
+    }
+  }
+
+  Future<void> unsetLike(int videoId, userId, String value) async {
+    try {
+      await dio.post("$hostUrl/unset/like?userId=$userId&videoId=$videoId&value=$value");
+      print("liked!");
     } catch (e) {
       print(e.toString());
       rethrow;

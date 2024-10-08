@@ -17,8 +17,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     required UserRepository userRepo,
   }) : _userRepository = userRepo,
     super(HomeLoading()) {
-    on<HomeEvent>((event, emit) {
-      
+    on<LikeVideoEvent>((event, emit) {
+      print(userRepo.user);
     });
   }
 }

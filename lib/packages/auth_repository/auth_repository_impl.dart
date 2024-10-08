@@ -22,8 +22,13 @@ class AuthRepository {
   }
   
 
-  Future<Map<String, Object?>> signUp(String? email, String? login, String? phone, {required String password, required DateTime birth}) {
-    throw UnimplementedError();
+  Future<UserModel?> signUp(String? email, String? login, String? phone, {required String password, required String birth}) async {
+    try {
+      var user = await ApiServiceImpl().registration(password, birth, phone, login, email);
+      return user;
+    } catch (e) {
+      throw Exception(e.toString());
+    }
   }
   
 

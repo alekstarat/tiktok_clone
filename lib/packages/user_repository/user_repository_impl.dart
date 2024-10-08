@@ -8,11 +8,38 @@ class UserRepository {
   int? userId;
   SharedPreferences? prefs;
 
+  set setUsr(UserModel? usr) => user = usr;
+
   UserRepository(this.prefs);
 
   void setUser() async {
     await prefs!.setInt("userId", user!.id);
     print("Аккаунт сохранён: ${user!.name}");
+  }
+
+  Future<void> setLike(int videoId) async {
+    try {
+      user!.likedVideos.add(videoId);
+      await ApiServiceImpl().setLike(videoId, userId, user!.likedVideos.toSet().toList().toString());
+      print('Success!');
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  void logout() async {
+    await prefs!.remove("userId");
+    print("Успешный выход!");
+  }
+
+  Future<void> unsetLike(int videoId) async {
+    try {
+      user!.likedVideos.remove(videoId);
+      await ApiServiceImpl().setLike(videoId, userId, user!.likedVideos.toSet().toList().toString());
+      print('Success!');
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   Future<UserModel?> getAuthenticatedUser(int userId) async { 

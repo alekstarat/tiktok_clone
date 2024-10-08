@@ -7,7 +7,11 @@ final class InitialHomeEvent extends HomeEvent {}
 
 final class AddVideoEvent extends HomeEvent {}
 
-final class LikeVideoEvent extends HomeEvent {}
+final class LikeVideoEvent extends HomeEvent {
+  final int id;
+
+  LikeVideoEvent({required this.id});
+}
 
 final class AddCommentEvent extends HomeEvent {
 

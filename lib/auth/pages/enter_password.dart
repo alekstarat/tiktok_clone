@@ -2,8 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tiktok_clone/auth/bloc/auth_bloc/auth_bloc.dart';
-import 'package:tiktok_clone/packages/user_repository/user_repository_impl.dart';
-import 'package:tiktok_clone/pages/home_screen/home_screen.dart';
+import 'package:tiktok_clone/restart_widget.dart';
 
 class EnterPassword extends StatefulWidget {
   const EnterPassword({super.key});
@@ -45,14 +44,7 @@ class _EnterPasswordState extends State<EnterPassword> {
               return BlocListener<AuthBloc, AuthState>(
                 listener: (context, state) {
                   if (state is AuthenticatedState) {
-                    Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => RepositoryProvider(
-                                  create: (context) => context.read<UserRepository>(),
-                                  child: const HomeScreen(),
-                                )),
-                        (r) => r.isCurrent);
+                    RestartWidget.restartApp(context);
                   }
                 },
                 child: GestureDetector(
