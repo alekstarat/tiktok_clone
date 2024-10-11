@@ -6,7 +6,10 @@ import 'package:tiktok_clone/packages/user_repository/user_repository_impl.dart'
 import 'package:tiktok_clone/pages/home_screen/home_bloc/home_bloc.dart';
 
 class RecomendationsTab extends StatefulWidget {
-  const RecomendationsTab({super.key});
+
+  final Function onProfileTap;
+
+  const RecomendationsTab({super.key, required this.onProfileTap});
 
   @override
   State<RecomendationsTab> createState() => _RecomendationsTabState();
@@ -27,8 +30,16 @@ class _RecomendationsTabState extends State<RecomendationsTab>
 
   void _loadVideos() {
     setState(() {
-      loadedVideos.addAll(List<Widget>.generate(5,
-          (index) => VideoScreen(index: ids[index], fromRecomendations: true)));
+      loadedVideos.addAll(List<Widget>.generate(
+          5,
+          (index) => RepositoryProvider(
+                create: (_) => context.read<UserRepository>(),
+                child: BlocProvider(
+                  create: (_) => context.read<HomeBloc>(),
+                  child:
+                      VideoScreen(index: ids[index], fromRecomendations: true, onProfileTap: widget.onProfileTap,),
+                ),
+              )));
     });
     print("LOADED VIDEOS: ${loadedVideos.length}");
   }
@@ -36,29 +47,29 @@ class _RecomendationsTabState extends State<RecomendationsTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-        return SizedBox(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height - kToolbarHeight + 10,
-            child: CarouselSlider(
-                carouselController: _controller,
-                items: loadedVideos,
-                options: CarouselOptions(
-                  scrollDirection: Axis.vertical,
-                  viewportFraction: 1,
-                  enableInfiniteScroll: false,
-                  enlargeCenterPage: false,
-                  onPageChanged: (index, reason) {
-                    if (index >= currIdx) {
-                      setState(() {
-                        currIdx = index;
-                      });
-                    }
-                    print("currIdx: $currIdx");
-                    if (index % loadedVideos.length - 1 == 0) {
-                      _loadVideos();
-                    }
-                  },
-                )));
+    return SizedBox(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height - kToolbarHeight + 10,
+        child: CarouselSlider(
+            carouselController: _controller,
+            items: loadedVideos,
+            options: CarouselOptions(
+              scrollDirection: Axis.vertical,
+              viewportFraction: 1,
+              enableInfiniteScroll: false,
+              enlargeCenterPage: false,
+              onPageChanged: (index, reason) {
+                if (index >= currIdx) {
+                  setState(() {
+                    currIdx = index;
+                  });
+                }
+                print("currIdx: $currIdx");
+                if (index % loadedVideos.length - 1 == 0) {
+                  _loadVideos();
+                }
+              },
+            )));
   }
 
   @override

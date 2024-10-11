@@ -1,8 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
+import 'package:tiktok_clone/api/api_service_impl.dart';
+import 'dart:math';
 
-class VideoTile extends StatelessWidget {
+import 'package:video_player/video_player.dart';
+
+class VideoTile extends StatefulWidget {
 
   final int id;
   final bool isHidden;
@@ -10,13 +13,59 @@ class VideoTile extends StatelessWidget {
   const VideoTile({super.key, required this.id, required this.isHidden});
 
   @override
+  State<VideoTile> createState() => _VideoTileState();
+}
+
+class _VideoTileState extends State<VideoTile> {
+
+  late final VideoPlayerController _controller;
+  int? views;
+
+  void getViews() async {
+    await ApiServiceImpl().getVideo(widget.id).then((v) {
+      if (mounted) {
+        setState(() {
+          views = v.views;
+        });
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getViews();
+    _controller = VideoPlayerController.networkUrl(Uri.parse(
+        'http://10.0.2.2:8000/video/raw/${widget.id}'))
+      ..initialize().then((_) async {
+        await _controller.setVolume(0);
+        if (mounted) {
+          setState(() {});
+        }
+
+      });
+  }
+
+
+  @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Container(
-          color: Color((math.Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0),
+        SizedBox(
+          width: MediaQuery.of(context).size.width*0.33,
+          child: VideoPlayer(
+          _controller,
+                  ),
         ),
-        const Padding(
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.transparent, Colors.transparent, Colors.transparent, Colors.black.withOpacity(0.5)],
+              transform: const GradientRotation(pi/2)
+            )
+          ),
+        ),
+        Padding(
           padding: EdgeInsets.all(2.0),
           child: Align(
             alignment: Alignment.bottomLeft,
@@ -26,7 +75,7 @@ class VideoTile extends StatelessWidget {
               children: [
                 Icon(Icons.play_arrow_outlined, color: Colors.white, size: 15),
                 Text(
-                  "228",
+                  views == null ? "" : views.toString(),
                   style: TextStyle(
                     color: Colors.white,
                     fontFamily: 'PTSans',
@@ -39,7 +88,7 @@ class VideoTile extends StatelessWidget {
             ),
           ),
         ),
-        if (isHidden) const Padding(
+        if (widget.isHidden) const Padding(
           padding: EdgeInsets.all(2.0),
           child: Align(
             alignment: Alignment.bottomRight,

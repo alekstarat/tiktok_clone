@@ -1,7 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket
 from fastapi.responses import JSONResponse, FileResponse
 from database import Database
 import uvicorn
+import json
 
 app = FastAPI()
 db = Database("C:/Users/Sasher/Desktop/git/tiktok_clone/server/database.db")
@@ -41,8 +42,17 @@ def video_model(data):
             "reposts" : data[6],
             "sound_id" : data[7],
             "name" : data[8],
+            'views' : data[9]
         }
     )
+
+@app.websocket('/ws')
+async def websocket(websocket: WebSocket):
+    await websocket.accept()
+    while True:
+        data = await websocket.receive_text()
+        
+        await websocket.send_text(f"You said {data}")
 
 @app.get('/profile_name_image/{id}')
 async def get_profile_name_image(id: int):
@@ -66,10 +76,55 @@ async def get_profile_name_image(id: int):
             }
         )
 
+@app.post('/update/views')
+async def update_views(videoId: int):
+    try:
+        db.cursor.execute(f"UPDATE Videos SET views = views + 1 WHERE id = {videoId}")
+        db.connection.commit()
+        print('+1 view')
+    except:
+        return JSONResponse(
+            content={
+                'status_code': 401,
+                'message' : 'Ебалдяйкин'
+            }
+        )
+
+@app.post('/set/like')
+async def set_like(userId: int, videoId: int, value: str):
+    try:
+        db.cursor.execute(f"UPDATE Users SET liked_videos = '{value}' WHERE id = {userId}")
+        db.cursor.execute(f"UPDATE Videos SET likes = likes + 1 WHERE id = {videoId}")
+        db.connection.commit()
+        print('Success!')
+    except: 
+        return JSONResponse(
+            content={
+                'status_code' : 500,
+                'message' : 'Залупень'
+            }
+        )
+
+@app.post('/unset/like')
+async def unset_like(userId: int, videoId: int, value: str):
+    try:
+        db.cursor.execute(f"UPDATE Users SET liked_videos = '{value}' WHERE id = {userId}")
+        db.cursor.execute(f"UPDATE Videos SET likes = likes - 1 WHERE id = {videoId}")
+        db.connection.commit()
+        print('Success!')
+    except: 
+        return JSONResponse(
+            content={
+                'status_code' : 500,
+                'message' : 'Залупень'
+            }
+        )
+
 @app.get('/video/{id}')
 async def get_video(id: int):
     try: 
         data = list(db.cursor.execute(f"SELECT * FROM Videos WHERE id = {id}"))[0]
+        print(data)
         return video_model(data)
     except:
         return JSONResponse(
@@ -83,7 +138,6 @@ async def get_video(id: int):
 async def get_video_raw(id: str): 
     try:
         return FileResponse(
-            #f"C:/Users/Sasher/Desktop/git/tiktok_clone/server/videos/{id}.mp4"
             path=f"videos/{id}.mp4",
             media_type='video/mp4'
         )
@@ -131,6 +185,107 @@ async def get_image(name: str):
     return FileResponse(
         f'images/{name}'
     )
+
+@app.post('/{method}/registration')
+async def registration(name: str, password: str, birth: str, method: str):
+    try:
+        users = list(db.cursor.execute("SELECT * FROM Users"))
+        print(users)
+
+        for i in users:
+            if  (method == 'login' and i[1] == name) or (method == 'email' and i[14] == name) or (method == 'phone' and i[15] == name) :
+                return JSONResponse(
+                    content={
+                        'status_code' : 400,
+                        'message' : "Йобу дал занят логин >:D"
+                    }
+                )
+        else: 
+            db.cursor.execute("INSERT INTO Users (login, password, name, description, image, subscribers, subscriptions, videos, reposts, saved, liked_videos, chats, settings, email, phone, birthday) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+            (
+                name if method == 'login' else f'user{len(users)+1}',
+                password,
+                name if method == 'login' else name.split('@')[0] if method == 'email' else f'user{len(users)+1}',
+                "",
+                "",
+                '[]',
+                '[]',
+                '[]',
+                '[]',
+                '{"publishes" : [], "collections" : [], "music" : [], "effects" : [], "shop_items" : [], "places" : [], "films" : [], "books" : [], "comments" : [], "hashtags" : [], "tt_series" : []}',
+                '[]',
+                '[]',
+                '{}',
+                name if method == 'email' else "",
+                name if method == 'phone' else "",
+                birth
+            ))
+            db.connection.commit()
+            return user_model(list(db.cursor.execute(f'SELECT * FROM Users WHERE id = {len(users) + 1}'))[0])
+    except Exception as e:
+        print(e); 
+        return JSONResponse(
+            content={
+                "message" : "Проёб запроса сученька"
+            }
+        )
+    
+@app.post('/unsubscribe')
+async def unsubscribe(idFrom: int, idTo: int):
+    try:
+        valFrom = json.loads(list(db.cursor.execute(f'SELECT subscriptions FROM Users WHERE id = {idFrom}'))[0][0])
+        valFrom = [i for i in valFrom if i != idTo]
+        
+        valTo = json.loads(list(db.cursor.execute(f'SELECT subscribers FROM Users WHERE id = {idTo}'))[0][0])
+        valTo = [i for i in valTo if i != idFrom]
+
+        db.cursor.execute(f'UPDATE Users SET subscriptions = "{valFrom}" WHERE id = {idFrom}')
+        db.cursor.execute(f'UPDATE Users SET subscribers = "{valTo}" WHERE id = {idTo}')
+
+        db.connection.commit()
+
+        return JSONResponse(
+            content = {
+                'status_code' : 200,
+                "message" : "success!"
+            }
+        )
+    except Exception as e: 
+        print(e)
+        return JSONResponse(
+            content = {
+                'status_code' : 400,
+                'message' : 'астралопитек быля'
+            }
+        )
+
+@app.post('/subscribe')
+async def subscribe(idFrom: int, idTo: int):
+    try:
+        valFrom = json.loads(list(db.cursor.execute(f'SELECT subscriptions FROM Users WHERE id = {idFrom}'))[0][0])
+        valFrom.append(idTo)
+
+        valTo = json.loads(list(db.cursor.execute(f'SELECT subscribers FROM Users WHERE id = {idTo}'))[0][0])
+        valTo.append(idFrom)
+        db.cursor.execute(f"UPDATE Users SET subscriptions = '{valFrom}' WHERE id = {idFrom}")
+        db.cursor.execute(f"UPDATE Users SET subscribers = '{valTo}' WHERE id = {idTo}")
+
+        db.connection.commit()
+
+        return JSONResponse(
+            content = {
+                'status_code' : 200,
+                "message" : "success!"
+            }
+        )
+    except Exception as e:
+        print(e)
+        return JSONResponse(
+            content = {
+                'status_code' : 400,
+                'message' : 'астралопитек быля'
+            }
+        )
 
 @app.post('/{method}/login')
 async def login(name: str, password: str, method: str):

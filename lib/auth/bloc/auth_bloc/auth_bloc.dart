@@ -30,16 +30,34 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthProgressState());
       print(AuthProgressState());
     });
-    on<RegistrationEvent>((event, emit) {
+    on<LogoutEvent>((event, emit) {
+      emit(AuthLoadingState());
+      userRepo.logout();
+      emit(UnauthenticatedState());
+    });
+    on<RegistrationEvent>((event, emit) async {
       emit(AuthProgressState());
       print(AuthProgressState());
+      try {
+        await authRepo.signUp(authData['email'], authData['login'], authData['phone'], password: authData['password']!, birth: authData['birth']!).then((v) {
+          userRepo.setUsr = v!;
+          userRepo.setUser();
+          emit(AuthenticatedState(userModel: v));
+          print(AuthenticatedState);
+        });
+      } catch (e) {
+        emit(UnauthenticatedState());
+        print(UnauthenticatedState);
+      }
+      
     });
     on<AuthInitialEvent>((event, emit) async {
       emit(AuthLoadingState());
       print(AuthLoadingState());
       try {
         await userRepo.getAuthenticatedUser(userRepo.userId!).then((v) {
-          emit(AuthenticatedState(userModel: v!));
+          userRepo.setUsr = v!;
+          emit(AuthenticatedState(userModel: v));
           print(AuthenticatedState);
         });
       } catch (e) {
@@ -51,11 +69,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthLoadingState());
       print(AuthLoadingState());
         try {
-          userRepo.user = await authRepo.signIn(
+          userRepo.setUsr = await authRepo.signIn(
             authData.containsKey('login') ? authData['login'] : null,
             authData.containsKey('phone') ? authData['phone'] : null,
             authData.containsKey('email') ? authData['email'] : null,
             password: authData['password']!);
+        
           emit(AuthenticatedState(userModel: userRepo.user!));
           print(AuthenticatedState);
           userRepo.setUser();
