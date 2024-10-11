@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -32,22 +34,30 @@ class _ProfilePageState extends State<ProfilePage>
   UserModel? usr;
   bool filterPopular = false;
   bool isMyProfile = false;
+  bool isSubscribed = false;
 
   double currentExtent = 0.0;
 
   void getUser() async {
-    if (widget.fromVideo || widget.id != context.read<UserRepository>().userId) {
-      await ApiServiceImpl().getAuthenticatedUser(widget.id).then((v) {
-        setState(() {
-          usr = v;
-          print(v);
+    try {
+      if (widget.fromVideo || widget.id != context.read<UserRepository>().userId) {
+        await ApiServiceImpl().getAuthenticatedUser(widget.id).then((v) {
+          setState(() {
+            usr = v;
+            isSubscribed = context.read<UserRepository>().user!.subscriptions.contains(usr!.id);
+            print("isSubscribed: $isSubscribed");
+            print(v);
+          });
         });
-      });
-    } else {
-      setState(() {
-        usr = context.read<UserRepository>().user;
-      });
+      } else {
+        setState(() {
+          usr = context.read<UserRepository>().user;
+        });
+      }
+    } catch (e) {
+      print(e.toString());
     }
+    
     
   }
 
@@ -174,7 +184,7 @@ class _ProfilePageState extends State<ProfilePage>
       create: (_) => context.read<UserRepository>(),
       child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
-          if (state is AuthenticatedState) {
+          if (state is AuthenticatedState || widget.fromVideo) {
             //var usr = context.read<UserRepository>().user!;
             //var usr = ApiServiceImpl().getAuthenticatedUser(widget.id);
             return Scaffold(
@@ -316,15 +326,15 @@ class _ProfilePageState extends State<ProfilePage>
                             pinned: true,
                             centerTitle: true,
                             actions: [
-                              SvgPicture.asset(
+                              isMyProfile ? SvgPicture.asset(
                                 'assets/images/footprint.svg',
                                 width: 20,
                                 color: Colors.black,
-                              ),
+                              ) : const Icon(Icons.notifications_none_rounded, color: Colors.black, size: 20,),
                               Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 8),
-                                child: GestureDetector(
+                                child: isMyProfile ? GestureDetector(
                                   onTap: () {
                                     showModalBottomSheet(
                                         isScrollControlled: true,
@@ -333,7 +343,7 @@ class _ProfilePageState extends State<ProfilePage>
                                   },
                                   child: const Icon(Icons.menu_rounded,
                                       color: Colors.black, size: 20),
-                                ),
+                                ) : const Icon(CupertinoIcons.arrowshape_turn_up_right, color: Colors.black, size: 20,),
                               )
                             ],
                             title: isMyProfile ? Row(
@@ -691,21 +701,71 @@ class _ProfilePageState extends State<ProfilePage>
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           const SizedBox(height: 3,),
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              color: Colors.red[600],
-                                              borderRadius: BorderRadius.circular(8)
-                                            ),
-                                            width: 100,
-                                            height: kToolbarHeight/ 2 + 5,
-                                            child: const Center(
-                                              child: Text(
-                                                "Подписаться",
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 12
+                                          GestureDetector(
+                                            onTap: () async {
+                                              await context.read<UserRepository>().subscribe(context.read<UserRepository>().userId!, widget.id);
+                                              await context.read<UserRepository>().getAuthenticatedUser(widget.id).then((v) {
+                                                setState(() {
+                                                  usr = v!;
+                                                  isSubscribed = true;
+                                                });
+                                              });
+                                              context.read<UserRepository>().refreshUserData();
+                                            },
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: !isSubscribed ? Colors.red[600] : Colors.grey[300],
+                                                borderRadius: BorderRadius.circular(6)
+                                              ),
+                                              width: 100,
+                                              height: kToolbarHeight/ 2 + 5,
+                                              child: !isSubscribed ? const Center(
+                                                child: Text(
+                                                  "Подписаться",
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 12
+                                                  ),
                                                 ),
+                                              ) : const Center(
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Icon(CupertinoIcons.paperplane_fill, color: Colors.black, size: 15),
+                                                    Text(
+                                                      "Сообщение",
+                                                      style: TextStyle(
+                                                        fontWeight: FontWeight.bold,
+                                                        fontSize: 12
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          if (isSubscribed) const SizedBox(width: 3,),
+                                          if (isSubscribed) GestureDetector(
+                                            onTap: () async {
+                                              await context.read<UserRepository>().unsubscribe(context.read<UserRepository>().userId!, widget.id);
+                                              await context.read<UserRepository>().getAuthenticatedUser(widget.id).then((v) {
+                                                setState(() {
+                                                  usr = v!;
+                                                  isSubscribed = false;
+                                                });
+                                              });
+                                              context.read<UserRepository>().refreshUserData();
+                                            },
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[300],
+                                                borderRadius: BorderRadius.circular(6)
+                                              ),
+                                              width: kToolbarHeight / 2 + 5,
+                                              height: kToolbarHeight / 2 + 5,
+                                              child: const Center(
+                                                child: Icon(CupertinoIcons.person_badge_minus_fill, color: Colors.black, size: 15),
                                               ),
                                             ),
                                           ),
@@ -713,7 +773,7 @@ class _ProfilePageState extends State<ProfilePage>
                                           Container(
                                             decoration: BoxDecoration(
                                               color: Colors.grey[300],
-                                              borderRadius: BorderRadius.circular(8)
+                                              borderRadius: BorderRadius.circular(6)
                                             ),
                                             width: kToolbarHeight / 2 + 5,
                                             height: kToolbarHeight / 2 + 5,

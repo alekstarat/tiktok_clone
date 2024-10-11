@@ -1,7 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket
 from fastapi.responses import JSONResponse, FileResponse
 from database import Database
 import uvicorn
+import json
 
 app = FastAPI()
 db = Database("C:/Users/Sasher/Desktop/git/tiktok_clone/server/database.db")
@@ -44,6 +45,14 @@ def video_model(data):
             'views' : data[9]
         }
     )
+
+@app.websocket('/ws')
+async def websocket(websocket: WebSocket):
+    await websocket.accept()
+    while True:
+        data = await websocket.receive_text()
+        
+        await websocket.send_text(f"You said {data}")
 
 @app.get('/profile_name_image/{id}')
 async def get_profile_name_image(id: int):
@@ -218,6 +227,63 @@ async def registration(name: str, password: str, birth: str, method: str):
         return JSONResponse(
             content={
                 "message" : "Проёб запроса сученька"
+            }
+        )
+    
+@app.post('/unsubscribe')
+async def unsubscribe(idFrom: int, idTo: int):
+    try:
+        valFrom = json.loads(list(db.cursor.execute(f'SELECT subscriptions FROM Users WHERE id = {idFrom}'))[0][0])
+        valFrom = [i for i in valFrom if i != idTo]
+        
+        valTo = json.loads(list(db.cursor.execute(f'SELECT subscribers FROM Users WHERE id = {idTo}'))[0][0])
+        valTo = [i for i in valTo if i != idFrom]
+
+        db.cursor.execute(f'UPDATE Users SET subscriptions = "{valFrom}" WHERE id = {idFrom}')
+        db.cursor.execute(f'UPDATE Users SET subscribers = "{valTo}" WHERE id = {idTo}')
+
+        db.connection.commit()
+
+        return JSONResponse(
+            content = {
+                'status_code' : 200,
+                "message" : "success!"
+            }
+        )
+    except Exception as e: 
+        print(e)
+        return JSONResponse(
+            content = {
+                'status_code' : 400,
+                'message' : 'астралопитек быля'
+            }
+        )
+
+@app.post('/subscribe')
+async def subscribe(idFrom: int, idTo: int):
+    try:
+        valFrom = json.loads(list(db.cursor.execute(f'SELECT subscriptions FROM Users WHERE id = {idFrom}'))[0][0])
+        valFrom.append(idTo)
+
+        valTo = json.loads(list(db.cursor.execute(f'SELECT subscribers FROM Users WHERE id = {idTo}'))[0][0])
+        valTo.append(idFrom)
+        db.cursor.execute(f"UPDATE Users SET subscriptions = '{valFrom}' WHERE id = {idFrom}")
+        db.cursor.execute(f"UPDATE Users SET subscribers = '{valTo}' WHERE id = {idTo}")
+
+        db.connection.commit()
+
+        return JSONResponse(
+            content = {
+                'status_code' : 200,
+                "message" : "success!"
+            }
+        )
+    except Exception as e:
+        print(e)
+        return JSONResponse(
+            content = {
+                'status_code' : 400,
+                'message' : 'астралопитек быля'
             }
         )
 

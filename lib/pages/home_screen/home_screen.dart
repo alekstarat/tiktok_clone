@@ -1,11 +1,10 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nested_scroll_views/material.dart';
 import 'package:tiktok_clone/auth/bloc/auth_bloc/auth_bloc.dart';
-import 'package:tiktok_clone/auth/pages/auth_page.dart';
-import 'package:tiktok_clone/packages/auth_repository/auth_repository_impl.dart';
 import 'package:tiktok_clone/packages/user_repository/user_repository_impl.dart';
 import 'package:tiktok_clone/pages/home_screen/home_bloc/home_bloc.dart';
 import 'package:tiktok_clone/pages/home_screen/pages/create_video_page/create_video_page.dart';
@@ -180,12 +179,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   ),
                                 ),
                                 GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
+                                    onTap: () async {
+
+                                      await availableCameras().then((v) {
+                                        Navigator.push(
                                           context,
                                           MaterialPageRoute(
                                               builder: (context) =>
-                                                  const CreateVideoPage()));
+                                                  CreateVideoPage(cameras: v)));
+                                        return v;
+                                      });
+
+                                      
                                     },
                                     child: SizedBox(
                                       width: 40,

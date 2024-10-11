@@ -136,7 +136,7 @@ class _SelectBirthState extends State<SelectBirth> {
                       onTap: () {
                         if ([day, month, year].where((e) => e != null).length ==
                             3) {
-                              context.read<AuthBloc>().authData.addAll({'birth' : '$year-$month-$day'});
+                              context.read<AuthBloc>().authData.addAll({'birth' : '$year-${month.toString().length == 1 ? '0$month' : month}-$day'});
                               print(context.read<AuthBloc>().authData);
                           //Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const HomeScreen()), (r) => r.isActive);
                           context.read<AuthBloc>().add(RegistrationEvent());

@@ -27,6 +27,30 @@ class UserRepository {
     }
   }
 
+  void refreshUserData() async {
+    try {
+      user = await getAuthenticatedUser(userId!);
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  Future<void> subscribe(int fromId, toId) async {
+    try {
+      await ApiServiceImpl().subscribe(fromId, toId);
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  Future<void> unsubscribe(int fromId, toId) async {
+    try {
+      await ApiServiceImpl().unsubscribe(fromId, toId);
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
   void logout() async {
     await prefs!.remove("userId");
     print("Успешный выход!");

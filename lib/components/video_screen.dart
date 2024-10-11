@@ -6,10 +6,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tiktok_clone/api/api_service_impl.dart';
 import 'package:tiktok_clone/auth/bloc/auth_bloc/auth_bloc.dart';
 import 'package:tiktok_clone/components/comments_widget.dart';
+import 'package:tiktok_clone/components/loading_circle_animation.dart';
 import 'package:tiktok_clone/components/loading_screen.dart';
 import 'package:tiktok_clone/components/repost_widget.dart';
 import 'package:tiktok_clone/packages/models/comment_model.dart';
-import 'package:tiktok_clone/packages/models/user_model.dart';
 import 'package:tiktok_clone/packages/models/video_model.dart';
 import 'package:tiktok_clone/packages/user_repository/user_repository_impl.dart';
 import 'package:tiktok_clone/pages/home_screen/home_bloc/home_bloc.dart';
@@ -39,26 +39,28 @@ class _VideoScreenState extends State<VideoScreen> {
 
   void getVideo() async {
     video = await ApiServiceImpl().getVideo(widget.index).then((v) {
-      setState(() {
-        isLiked = context.read<UserRepository>().user != null
-            ? context
-                .read<UserRepository>()
-                .user!
-                .likedVideos
-                .contains(widget.index)
-            : false;
-        try {
-          isSaved = context.read<UserRepository>().user != null
+      if (mounted) {
+        setState(() {
+          isLiked = context.read<UserRepository>().user != null
               ? context
                   .read<UserRepository>()
                   .user!
-                  .saved['videos']
+                  .likedVideos
                   .contains(widget.index)
               : false;
-        } catch (e) {
-          isSaved = false;
-        }
-      });
+          try {
+            isSaved = context.read<UserRepository>().user != null
+                ? context
+                    .read<UserRepository>()
+                    .user!
+                    .saved['videos']
+                    .contains(widget.index)
+                : false;
+          } catch (e) {
+            isSaved = false;
+          }
+        });
+      }
       return v;
     });
     authorData = await ApiServiceImpl().getProfileNameImage(video!.authorId);
@@ -76,7 +78,7 @@ class _VideoScreenState extends State<VideoScreen> {
     _controller = VideoPlayerController.networkUrl(
         Uri.parse("http://10.0.2.2:8000/video/raw/${widget.index}"),
         videoPlayerOptions: VideoPlayerOptions(
-            webOptions: VideoPlayerWebOptions(
+            webOptions: const VideoPlayerWebOptions(
                 controls: VideoPlayerWebOptionsControls.enabled())))
       ..initialize().then((_) async {
         setState(() {});
@@ -108,7 +110,7 @@ class _VideoScreenState extends State<VideoScreen> {
           builder: (context, authState) {
             return BlocBuilder<HomeBloc, HomeState>(
               builder: (context, state) {
-                final authBloc = context.read<AuthBloc>();
+                //final authBloc = context.read<AuthBloc>();
                 return Material(
                   type: MaterialType.transparency,
                   child: GestureDetector(
@@ -149,7 +151,7 @@ class _VideoScreenState extends State<VideoScreen> {
                                       child: VideoPlayer(_controller),
                                     ),
                                   )
-                                : const LoadingScreen(),
+                                : const LoadingCircleAnimation(),
                           ),
                           IgnorePointer(
                             ignoring: true,

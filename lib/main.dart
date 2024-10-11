@@ -1,3 +1,4 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tiktok_clone/auth/bloc/auth_bloc/auth_bloc.dart';
@@ -9,8 +10,14 @@ import 'package:tiktok_clone/pages/home_screen/home_bloc/home_bloc.dart';
 import 'package:tiktok_clone/pages/home_screen/home_screen.dart';
 import 'package:tiktok_clone/restart_widget.dart';
 
+
+late List<CameraDescription> _cameras;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  _cameras = await availableCameras();
+
   runApp(RestartWidget(
     child: MaterialApp(
       theme: ThemeData(

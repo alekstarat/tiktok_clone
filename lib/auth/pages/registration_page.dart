@@ -85,7 +85,7 @@ class _RegistrationPageState extends State<RegistrationPage>
               onTap: () {
                 if (currReady) {
                   if (_controller.index == 0) {
-                    context.read<AuthBloc>().authData.addAll({'phone' : _phoneController.text});
+                    context.read<AuthBloc>().authData.addAll({'phone' : "7${_phoneController.text}"});
                   } else {
                     if (_emailController.text.contains('@')) {
                       context.read<AuthBloc>().authData.addAll({'email' : _emailController.text});

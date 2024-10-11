@@ -53,6 +53,30 @@ class ApiServiceImpl {
     }
   }
 
+  Future<void> subscribe(int fromId, toId) async {
+    try {
+      await dio.post('$hostUrl/subscribe?idFrom=$fromId&idTo=$toId').then((v) {
+        if (v.data == null) {
+          print("success subscription!");
+        }
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> unsubscribe(int fromId, toId) async {
+    try {
+      await dio.post('$hostUrl/unsubscribe?idFrom=$fromId&idTo=$toId').then((v) {
+        if (v.data == null) {
+          print("success unsubscription!");
+        }
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<VideoModel> getVideo(int id) async {
     try {
       var response = await dio.get("$hostUrl/video/$id");
